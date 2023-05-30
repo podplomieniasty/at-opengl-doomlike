@@ -11,7 +11,8 @@
 // ---- Tekstury ----
 
 #include "textures/Bricks_01.ppm"
-
+#include "textures/Planks_01.ppm"
+#include "textures/Skybox_01.ppm"
 
 
 // ---- Sta³e ----
@@ -82,13 +83,13 @@ int map_walls[] = {
 
 	1,1,1,1,1,1,1,1,1,1,
 	1,0,1,0,0,0,0,0,0,1,
-	1,0,1,0,0,0,0,0,0,1,
+	1,0,1,1,1,0,0,0,0,1,
 	1,0,0,0,1,0,0,0,0,1,
-	1,0,0,0,0,0,1,1,0,1,
-	1,0,0,2,0,0,1,0,0,1,
-	1,0,0,0,0,0,1,1,0,1,
-	1,0,0,0,0,0,0,1,1,1,
-	1,0,0,0,0,0,0,0,0,1,
+	1,0,1,0,0,0,0,0,0,1,
+	1,0,1,1,1,1,1,1,0,1,
+	1,0,0,0,0,1,0,0,0,1,
+	1,0,1,0,0,0,0,0,1,1,
+	1,0,1,0,0,0,1,0,0,1,
 	1,1,1,1,1,1,1,1,1,1,
 };	// bloki œcian mapy
 
@@ -161,12 +162,12 @@ void gm_drawMapIn2D() {
 
 		for (x = 0; x < mapX; x++) {
 
-			if (map[y * mapX + x] == 1) {
+			if (map_walls[y * mapX + x] == 1) {
 
 				// œciany oznaczone kolorem czarnym
 				glColor3f(0, 0, 0);	
 			}
-			else if (map[y * mapX + x] == 0) {
+			else if (map_walls[y * mapX + x] == 0) {
 
 				// puste pola oznaczone kolorem bia³ym
 				glColor3f(1, 1, 1);
@@ -210,18 +211,12 @@ float gm_distance(float ax, float ay, float bx, float by, float ang) {
 
 void gm_castRays3D() {
 
-	// rysowanie nieba (tmp.)
-	glColor3f(0, 1, 1); glBegin(GL_QUADS); glVertex2i(526, 0); glVertex2i(1006, 0); glVertex2i(1006, 160); glVertex2i(526, 160); glEnd();
-
-	// rysowanie pod³ogi (tmp.)
-	glColor3f(0, 0, 1); glBegin(GL_QUADS); glVertex2i(526, 160); glVertex2i(1006, 160); glVertex2i(1006, 320); glVertex2i(526, 320); glEnd();
-
 	int r, mx, my, mp, dof, side; 
 	float vx, vy, rx, ry, ra, xo, yo, disV, disH;
 
 	ra = fixAngle(pa + 30);		// promieñ z odstêpem 30deg
 
-	for (r = 0; r < 60; r++)
+	for (r = 0; r < 120; r++)
 	{
 		int vmt = 0, hmt = 0;
 
@@ -328,21 +323,21 @@ void gm_castRays3D() {
 			disH = disV; 
 			glColor3f(0, 0.6, 0);
 		}
-		glLineWidth(2); glBegin(GL_LINES); glVertex2i(px, py); glVertex2i(rx, ry); glEnd(); // rysowanie promienia
+		//glLineWidth(2); glBegin(GL_LINES); glVertex2i(px, py); glVertex2i(rx, ry); glEnd(); // rysowanie promienia
 
 		int ca = fixAngle(pa - ra); 
 		disH = disH * cos(degToRad(ca));
-		int lineH = (mapS * 320) / (disH);
+		int lineH = (mapS * HEIGHT) / (disH);
 
 		float ty_step = 32.0 / (float)lineH;
 		float ty_off = 0;
 
-		if (lineH > 320) {
-			ty_off = (lineH - 320)/2.0;
-			lineH = 320;
+		if (lineH > HEIGHT) {
+			ty_off = (lineH - HEIGHT)/2.0;
+			lineH = HEIGHT;
 
 		}
-		int lineOff = 160 - (lineH >> 1);
+		int lineOff = HEIGHT/2 - (lineH >> 1);
 
 		// rysowanie œcian
 
@@ -370,14 +365,44 @@ void gm_castRays3D() {
 			glPointSize(8);
 			glColor3ub(red, green, blue);
 			glBegin(GL_POINTS);
-			glVertex2i(r * 8 + 530, y + lineOff);
+			glVertex2i(r * 8, y + lineOff);
 			glEnd();
 			textureY += ty_step;
 		}
 
-		//glLineWidth(8); glBegin(GL_LINES); glVertex2i(r * 8 + 530, lineOff); glVertex2i(r * 8 + 530, lineOff + lineH); glEnd(); // rysowanie œciany
 
-		ra = fixAngle(ra - 1); // kolejny promieñ
+		// rysowanie pod³ogi
+
+		if (map_floor[mp] == 0)	texture = Planks_01;
+		else					texture = Bricks_01;
+
+		for (int y = lineOff + lineH; y < HEIGHT; y++) {
+
+			
+
+			float dy = y - (HEIGHT / 2.0);
+			float deg = degToRad(ra);
+			float raFix = cos(degToRad(fixAngle(pa - ra)));
+			int magicNum = 158 * 32*2.5;
+			textureX = px / 2 + cos(deg) * magicNum / dy / raFix;
+			textureY = py / 2 - sin(deg) * magicNum / dy / raFix;
+
+			int mp = map_floor[(int)(textureY / 32.0)] * mapX + (int)(textureX / 32.0);
+
+			int pixel = (((int)(textureY) & 31)*32 + ((int)textureX & 31)) * 3;
+			int red = texture[pixel + 0];
+			int green = texture[pixel + 1];
+			int blue = texture[pixel + 2];
+			glPointSize(8);
+			glColor3ub(red, green, blue);
+			glBegin(GL_POINTS);
+			glVertex2i(r * 8, y);
+			glEnd();
+		}
+
+		
+
+		ra = fixAngle(ra - 0.5); // kolejny promieñ
 	}
 }
 
@@ -395,6 +420,35 @@ void gm_castRays3D() {
 void gm_displayResize(int width, int height) {
 
 	glutReshapeWindow(WIDTH, HEIGHT);
+}
+
+void gm_drawSkybox() {
+
+	// aktualny obrazek ma wymiary
+	// 120x80.
+	int skyboxWidth = 120;
+	int skyboxHeight = 80;
+	int* texture = Skybox_01;
+	for (int y = 0; y < skyboxHeight/1.5; y++) {
+		for (int x = 0; x < skyboxWidth; x++) {
+
+			int xOffset = (int)pa*2 - x;
+			if (xOffset < 0) xOffset += skyboxWidth;
+			xOffset %= skyboxWidth;
+
+
+			int pixel = (y * skyboxWidth + xOffset) * 3;
+			int red = texture[pixel + 0];
+			int green = texture[pixel + 1];
+			int blue = texture[pixel + 2];
+
+			glPointSize(8);
+			glColor3ub(red, green, blue);
+			glBegin(GL_POINTS);
+			glVertex2i(x * 8, y * 8);
+			glEnd();
+		}
+	}
 }
 
 void gm_displayFunc() {
@@ -437,19 +491,19 @@ void gm_displayFunc() {
 	if (keys.s == 1) {
 		//px -= pdx* 0.2 * fps;
 		//py -= pdy * 0.2 * fps;
-		if (map[ipy * mapX + ipx_sub_off] == 0) {
+		if (map_walls [ipy * mapX + ipx_sub_off] == 0) {
 			px -= pdx * 0.2 * fps;
 		}
-		if (map[ipy_sub_off * mapX + ipx] == 0) {
+		if (map_walls[ipy_sub_off * mapX + ipx] == 0) {
 			py -= pdy * 0.2 * fps;
 		}
 	}
 	if (keys.w == 1) {
 
-		if (map[ipy * mapX + ipx_add_off] == 0) {
+		if (map_walls[ipy * mapX + ipx_add_off] == 0) {
 			px += pdx * 0.2 * fps;
 		}
-		if (map[ipy_add_off * mapX + ipx] == 0) {
+		if (map_walls[ipy_add_off * mapX + ipx] == 0) {
 			py += pdy * 0.2 * fps;
 		}
 
@@ -457,10 +511,13 @@ void gm_displayFunc() {
 	glutPostRedisplay();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	gm_drawMapIn2D();
-	gm_castRays3D();
-	gm_drawPlayer();
+	
+	// wyœwietlanie 2D
+	//gm_drawMapIn2D();
+	//gm_drawPlayer();
 
+	gm_drawSkybox();
+	gm_castRays3D();
 	
 
 

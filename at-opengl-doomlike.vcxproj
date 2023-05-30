@@ -157,9 +157,13 @@
     <ClInclude Include="dependencies\GLFW\include\GLFW\glfw3native.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".gitignore" />
     <None Include="dependencies\freeglut\bin\Win32\freeglut.dll" />
     <None Include="dependencies\freeglut\bin\x64\freeglut.dll" />
+    <None Include="README.md" />
     <None Include="textures\Bricks_01.ppm" />
+    <None Include="textures\Planks_01.ppm" />
+    <None Include="textures\Skybox_01.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />
