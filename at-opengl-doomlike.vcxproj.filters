@@ -56,6 +56,11 @@
     <None Include=".gitignore" />
     <None Include="textures\Planks_01.ppm" />
     <None Include="textures\Skybox_01.ppm" />
+    <None Include="splasharts\Splashart_test.ppm" />
+    <None Include="audio\DUN_DUN_DUN.ogg" />
+    <None Include="textures\Amogus_01.ppm" />
+    <None Include="textures\All_Textures.ppm" />
+    <None Include="textures\Textures.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />

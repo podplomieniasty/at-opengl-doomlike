@@ -158,12 +158,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="audio\DUN_DUN_DUN.ogg" />
     <None Include="dependencies\freeglut\bin\Win32\freeglut.dll" />
     <None Include="dependencies\freeglut\bin\x64\freeglut.dll" />
     <None Include="README.md" />
+    <None Include="splasharts\Splashart_test.ppm" />
+    <None Include="textures\All_Textures.ppm" />
+    <None Include="textures\Amogus_01.ppm" />
     <None Include="textures\Bricks_01.ppm" />
     <None Include="textures\Planks_01.ppm" />
     <None Include="textures\Skybox_01.ppm" />
+    <None Include="textures\Textures.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />
