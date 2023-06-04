@@ -61,9 +61,19 @@
     <None Include="textures\Amogus_01.ppm" />
     <None Include="textures\All_Textures.ppm" />
     <None Include="textures\Textures.ppm" />
+    <None Include="textures\podloga.ppm" />
+    <None Include="textures\Floor.ppm" />
+    <None Include="textures\Walls.ppm" />
+    <None Include="textures\Sprites.ppm" />
+    <None Include="textures\Crossbow.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />
     <Library Include="dependencies\GLFW\lib\glfw3_mt.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="audio\DUN_DUN_DUN.wav">
+      <Filter>Pliki zasobów</Filter>
+    </Media>
   </ItemGroup>
 </Project>
