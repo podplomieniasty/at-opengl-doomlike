@@ -158,7 +158,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="audio\DUN_DUN_DUN.ogg" />
     <None Include="dependencies\freeglut\bin\Win32\freeglut.dll" />
     <None Include="dependencies\freeglut\bin\x64\freeglut.dll" />
     <None Include="README.md" />
@@ -166,6 +165,7 @@
     <None Include="textures\All_Textures.ppm" />
     <None Include="textures\Amogus_01.ppm" />
     <None Include="textures\Bricks_01.ppm" />
+    <None Include="textures\Chaser.ppm" />
     <None Include="textures\Crossbow.ppm" />
     <None Include="textures\Floor.ppm" />
     <None Include="textures\Planks_01.ppm" />
@@ -176,11 +176,17 @@
     <None Include="textures\Walls.ppm" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="dependencies\freeglut\lib\Win32\freeglut.lib" />
+    <Library Include="dependencies\freeglut\lib\x64\freeglut.lib" />
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />
     <Library Include="dependencies\GLFW\lib\glfw3_mt.lib" />
   </ItemGroup>
   <ItemGroup>
+    <Media Include="audio\coin.wav" />
     <Media Include="audio\DUN_DUN_DUN.wav" />
+    <Media Include="audio\lever.wav" />
+    <Media Include="audio\loss.wav" />
+    <Media Include="audio\shoot.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

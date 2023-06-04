@@ -57,7 +57,6 @@
     <None Include="textures\Planks_01.ppm" />
     <None Include="textures\Skybox_01.ppm" />
     <None Include="splasharts\Splashart_test.ppm" />
-    <None Include="audio\DUN_DUN_DUN.ogg" />
     <None Include="textures\Amogus_01.ppm" />
     <None Include="textures\All_Textures.ppm" />
     <None Include="textures\Textures.ppm" />
@@ -66,13 +65,28 @@
     <None Include="textures\Walls.ppm" />
     <None Include="textures\Sprites.ppm" />
     <None Include="textures\Crossbow.ppm" />
+    <None Include="textures\Chaser.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />
     <Library Include="dependencies\GLFW\lib\glfw3_mt.lib" />
+    <Library Include="dependencies\freeglut\lib\Win32\freeglut.lib" />
+    <Library Include="dependencies\freeglut\lib\x64\freeglut.lib" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="audio\DUN_DUN_DUN.wav">
+      <Filter>Pliki zasobów</Filter>
+    </Media>
+    <Media Include="audio\shoot.wav">
+      <Filter>Pliki zasobów</Filter>
+    </Media>
+    <Media Include="audio\coin.wav">
+      <Filter>Pliki zasobów</Filter>
+    </Media>
+    <Media Include="audio\lever.wav">
+      <Filter>Pliki zasobów</Filter>
+    </Media>
+    <Media Include="audio\loss.wav">
       <Filter>Pliki zasobów</Filter>
     </Media>
   </ItemGroup>

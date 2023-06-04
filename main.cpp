@@ -21,6 +21,7 @@
 #include "textures/Crossbow.ppm"
 
 #include "textures/Amogus_01.ppm"
+#include "textures/Chaser.ppm"
 #include "textures/Sprites.ppm"
 
 
@@ -67,7 +68,8 @@ enum SpriteType {
 	SPRITE_ENEMY,
 	LEVER,
 	BULLET,
-	COIN
+	COIN,
+	CHASER,
 };
 
 enum ScreenType {
@@ -75,6 +77,15 @@ enum ScreenType {
 	SCR_GAME,
 	SCR_LV_PASS,
 	SCR_LV_FAIL
+};
+
+enum GameState {
+	GM_BEGIN = 0,
+	GM_TITLE,
+	GM_GAME,
+	GM_WIN,
+	GM_LOST,
+	GM_MAP
 };
 
 
@@ -90,7 +101,12 @@ typedef struct GameInfo {
 
 	int score = 0;
 	bool isExitUnlocked = false;
+	bool gameOver = false;
 	ScreenType activeScreen = SCR_TITLE;
+	GameState state = GM_TITLE;
+	int timer = 0;
+	bool canClick = false;
+
 }; GameInfo gameInfo;			// stany gry
 
 typedef struct Sprite {
@@ -106,9 +122,11 @@ typedef struct Sprite {
 	bool toggled = false;
 	int liveTime = -1;		// sekundy
 	int spawnedAt = GLUT_ELAPSED_TIME;
+	float detectionRange;
 
 	float angle;
 	float velocity;
+	float step;
 
 	Sprite(SpriteType type) {
 		this->type = type;
@@ -116,6 +134,9 @@ typedef struct Sprite {
 			case SPRITE_STATIC:
 				texture = Amogus_01;
 				z = 30;
+				detectionRange = 120.0;
+				velocity = 0.1;
+				step = 1;
 				break;
 			case COIN:
 				texture = Sprites;
@@ -144,17 +165,29 @@ typedef struct Sprite {
 		switch (type) {
 
 			case SPRITE_STATIC:
-				active = false;
+				if (!toggled) {
+					toggled = true;
+					gameInfo.gameOver = true;
+					gameInfo.canClick = false;
+					PlaySound(L"audio/loss.wav", NULL, SND_ASYNC | SND_FILENAME);
+
+				}
 				break;
 			case LEVER:
 				if (!toggled) {
+					PlaySound(L"audio/lever.wav", NULL, SND_ASYNC | SND_FILENAME);
 					toggled = true;
 					map = 1;
 					gameInfo.isExitUnlocked = true;
 				}
 				break;
 			case COIN:
-				gameInfo.score += 100;
+				if (!toggled) {
+					PlaySound(L"audio/coin.wav", NULL, SND_ASYNC | SND_FILENAME);
+					gameInfo.score += 100;
+					active = false;
+					toggled = true;
+				}
 				break;
 			
 
@@ -179,6 +212,7 @@ ButtonKeys keys;			// uk³ad stanów klawiszy gracza
 Player player;				// gracz
 int rayDepth[RAYS_NUM];		// g³êbia ka¿dego promienia
 float frame1, frame2, fps;	// klatki wykorzystane do renderowania
+GameState state;
 
 std::vector<Sprite> sprites[2];
 
@@ -249,7 +283,10 @@ void gm_handleButtonUp(unsigned char key, int x, int y) {
 
 void gm_handleClick(int button, int state, int x, int y) {
 
+	if (gameInfo.canClick == false) return;
+	std::cout << gameInfo.canClick;
 	if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
+		PlaySound(L"audio/shoot.wav", NULL, SND_ASYNC | SND_FILENAME);
 		Sprite bullet(BULLET);
 		bullet.velocity = 0.5;
 		bullet.angle = player.angle;
@@ -264,7 +301,6 @@ void gm_handleClick(int button, int state, int x, int y) {
 void gm_drawSprite() {
 
 	// sprawdzenie, czy gracz jest w zasiêgu interakcji ze spritem
-	
 
 	for (int s = 0; s < sprites->size(); s++) {
 
@@ -284,6 +320,23 @@ void gm_drawSprite() {
 				return;
 			}
 
+			for (int e = 0; e < sprites->size(); e++) {
+				if (sprites->at(e).type == SPRITE_STATIC) {
+
+					if (sprites->at(s).x < sprites->at(e).x + sprites->at(e).hitbox &&
+						sprites->at(s).x > sprites->at(e).x - sprites->at(e).hitbox &&
+						sprites->at(s).y < sprites->at(e).y + sprites->at(e).hitbox &&
+						sprites->at(s).y > sprites->at(e).y - sprites->at(e).hitbox) {
+
+						int indexOfEnemy = e < s ? e : e + 1;
+
+						sprites->erase(sprites->begin() + s);
+						sprites->erase(sprites->begin() + indexOfEnemy);
+						return;
+					}
+				}
+			}
+
 			float dx = cos(degToRad(sprites->at(s).angle));
 			float dy = -sin(degToRad(sprites->at(s).angle));
 
@@ -292,6 +345,25 @@ void gm_drawSprite() {
 			sprites->at(s).y += dy * sprites->at(s).velocity * fps;
 
 		}
+
+		//if (sprites->at(s).type == SPRITE_STATIC && gameInfo.state == GM_GAME) {
+
+
+		//	// w zasiegu wzroku
+		//	if (player.x < sprites->at(s).x + sprites->at(s).detectionRange &&
+		//		player.x > sprites->at(s).x - sprites->at(s).detectionRange &&
+		//		player.y < sprites->at(s).y + sprites->at(s).detectionRange &&
+		//		player.y > sprites->at(s).y - sprites->at(s).detectionRange) {
+
+		//		float step = sprites->at(s).step * sprites->at(s).velocity * fps;
+
+		//		if (player.x < sprites->at(s).x) sprites->at(s).x -= step;
+		//		if (player.x > sprites->at(s).x) sprites->at(s).x += step;
+		//		if (player.y < sprites->at(s).y) sprites->at(s).x -= step;
+		//		if (player.y > sprites->at(s).y) sprites->at(s).x += step;
+		//	}
+
+		//}
 
 		float spriteX = sprites->at(s).x - player.x;	// odleg³oœæ od gracza
 		float spriteY = sprites->at(s).y - player.y;
@@ -636,10 +708,10 @@ void gm_init() {
 
 	glClearColor(0.3, 0.3, 0.3, 0);
 
-
 	player.x = 300; player.y = 300; player.angle = 0;
 	player.dx = cos(degToRad(player.angle));
 	player.dy = -sin(degToRad(player.angle));
+
 
 	Sprite s(SPRITE_STATIC);
 	s.x = 2 * 64;
@@ -655,6 +727,10 @@ void gm_init() {
 	lev.x = 1.5 * 64; lev.y = 1.5 * 64;
 	sprites->push_back(c);
 	sprites->push_back(lev);
+
+
+	gameInfo.state = GM_BEGIN;
+
 }
 
 void gm_displayResize(int width, int height) {
@@ -742,8 +818,6 @@ void gm_drawSkybox() {
 	}
 }
 
-int gameState = 0, timer = 0;
-
 void gm_displayFunc() {
 
 	// tutaj s¹ konfiguracje odnoœnie
@@ -755,24 +829,26 @@ void gm_displayFunc() {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (gameState == 0) {	// inicjalizacja
+	if (gameInfo.state == GM_BEGIN) {	// inicjalizacja
 
 		gm_init();
-		timer = 0;
-		gameState = 1;
+		gameInfo.timer = 0;
+		gameInfo.state = GM_TITLE;
 		PlaySound(L"audio/DUN_DUN_DUN.wav", NULL, SND_ASYNC | SND_FILENAME);
 
 	}
-	if (gameState == 1) {	// okno g³ówne
+	if (gameInfo.state == GM_TITLE) {	// okno g³ówne
 
 		gm_screen(SCR_TITLE);
-		timer += 1 * fps;
-		if (timer > 2500) {
-			timer = 0;
-			gameState = 2;
+		gameInfo.timer += 1 * fps;
+		if (gameInfo.timer > 2500) {
+			gameInfo.timer = 0;
+			gameInfo.state = GM_GAME;
+			gameInfo.canClick = true;
+
 		}
 	}
-	if (gameState == 2) {	// pêtla gry
+	if (gameInfo.state == GM_GAME) {	// pêtla gry
 
 		if (keys.a == 1) {
 			player.angle += 0.2 * fps;
