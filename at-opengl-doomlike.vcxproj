@@ -180,6 +180,7 @@
     <None Include="textures\Floor.ppm" />
     <None Include="textures\Planks_01.ppm" />
     <None Include="textures\podloga.ppm" />
+    <None Include="textures\Shotgun.ppm" />
     <None Include="textures\Skybox_01.ppm" />
     <None Include="textures\Sprites.ppm" />
     <None Include="textures\Textures.ppm" />

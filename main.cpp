@@ -18,10 +18,16 @@
 
 // ---- Tekstury ----
 
+/**
+
+	Wszystkie tekstury s¹ odczytywane z plików PPM, gdzie s¹ 
+	importowane tablice intów reprezentuj¹ce kolory RGB.
+*/
+
 #include "textures/Skybox_01.ppm"
 #include "textures/Floor.ppm"
 #include "textures/Walls.ppm"
-#include "textures/Crossbow.ppm"
+#include "textures/Shotgun.ppm"
 
 #include "textures/Amogus_01.ppm"
 #include "textures/Chaser.ppm"
@@ -45,22 +51,49 @@
 #define TITLE		"Raycasting - Bialas, Burzec i Kijowski"
 
 #define MAP_HEIGHT	320	
-#define mapS		64  // rozmiar kostki mapy
+#define mapS		64  // Rozmiar kostki renderowanej mapy
 
-#define RAYS_NUM	240	// iloœæ promieni rysuj¹cych
+/**
+* @brief	Iloœæ promieni do wyrenderowania na ekranie
+*/
+#define RAYS_NUM	240	// Iloœæ promieni rysuj¹cych
 
+/**
+* @brief	Funkcja do wyœwietlenia ekranu przegranej / wygranej.
+* @param[in]	gitGud	- informacja o tym, czy przegrano. Domyœlnie false.
+*/
 void gm_handleEndGame(bool gitGud = false);
 
 // ---- Funkcje obliczaj¹ce ----
 
+/**
+* @brief	Funkcja zamieniaj¹ca stopnie na radiany.
+* @param[in]	float a - stopieñ k¹ta.
+* @return K¹t w radianach.
+*/
 float degToRad(float a) { return a * PI / 180.0; };
+/**
+* @brief	Funkcja umieszczaj¹ca k¹t w przedziale [0, 359).
+* @param[in]	float a - stopieñ k¹ta.
+* @return Poprawiony k¹t.
+*/
 float fixAngle(float a) { if (a > 359) a -= 360; if (a < 0) a += 360; return a; };
+/**
+* @brief	Obliczaj¹ca dystans pomiêdzy dwoma punktami na mapie.
+* @param[in]	float ax, ay - po³o¿enie punktu a.
+* @param[in]	float bx, by - po³o¿enie punktu b.
+* @param[in]	float angle - k¹t po³o¿enia.
+* @return Odleg³oœæ pomiêdzy punktami.
+*/
 float distance(float ax, float ay, float bx, float by, float angle) { return cos(degToRad(angle)) * (bx - ax) - sin(degToRad(angle)) * (by - ay); };
 
 
 
 // ---- Enumy ----
 
+/**
+* @brief	Typ sprite do wyrenderowania na ekran.
+*/
 enum SpriteType {
 
 	ENEMY = 1,
@@ -76,6 +109,9 @@ enum SpriteType {
 	CHAIR,
 	EXIT
 };
+/**
+* @brief	Typ obrazu do wyrenderowania na ekranie.
+*/
 enum ScreenType {
 	SCR_TITLE = 1,
 	SCR_MENU,
@@ -83,6 +119,9 @@ enum ScreenType {
 	SCR_LV_PASS,
 	SCR_LV_FAIL
 };
+/**
+* @brief	Typ stanu gry. 
+*/
 enum GameState {
 	GM_SETUP = 0,
 	GM_MENU_TITLE,
@@ -96,11 +135,20 @@ enum GameState {
 
 
 // ---- Struktury ----
-
+/**
+* 	Struktura przechowuj¹ca dane o aktualnie
+*	naciœniêtych przyciskach. Mapuje wybrane
+*   przyciski i okreœla im stan logiczny true/false.
+*/
 typedef struct {
 
 	int w, a, s, d, tab;// klawisze ze stanami on/off
 } ButtonKeys;
+/**
+* Jest to specjalna struktura przechowuj¹ca informacje
+* o wa¿nych wartoœciach gry, takich jak wynik punktowy,
+* odblokowane wyjœcie, aktywny obraz itp.
+*/
 typedef struct GameInfo {
 
 	int score				= 0;
@@ -113,6 +161,11 @@ typedef struct GameInfo {
 	bool canClick			= false;
 
 }; GameInfo gameInfo;			// stany gry
+/**
+* Jest to specjalna struktura przechowuj¹ca informacje
+* o sprite'ach i ich w³aœciwoœciach.
+* \sa SpriteType()
+*/
 typedef struct Sprite {
 
 	int type;							// statyczny, przeciwnik, pickup -- przerobic na enum
@@ -133,6 +186,11 @@ typedef struct Sprite {
 	float velocity;
 	float step;
 
+	/**
+		@brief Domyœlny konstruktor struktury.
+		@param[in] SpriteType type  -  Typ danego Sprite.
+		@see SpriteType()
+	*/
 	Sprite(SpriteType type) {
 		this->type = type;
 		switch (type) {
@@ -205,6 +263,9 @@ typedef struct Sprite {
 	void hide() {
 		this->active = false;
 	}
+	/**
+		@brief Funkcja wywo³ywana, kiedy gracz znajdzie siê w zasiêgu interakcji.
+	*/
 	void handleOnPlayerTouch() {
 		switch (type) {
 
@@ -241,6 +302,9 @@ typedef struct Sprite {
 		}		
 	}
 };
+/**
+* @brief Struktura przechowuj¹ca dane o graczu. Wymaga inicjalizacji funkcj¹ gm_placePlayer().
+*/
 typedef struct {
 
 	float	x,		// pozycja X gracza
@@ -254,28 +318,31 @@ typedef struct {
 
 // ---- Zmienne globalne ----
 
-ButtonKeys			keys;			// uk³ad stanów klawiszy gracza
-Player				player;				// gracz
-int					rayDepth[RAYS_NUM] = { 0 };		// g³êbia ka¿dego promienia
-float				frame1 = 0, frame2 = 0, fps = 0;	// klatki wykorzystane do renderowania
-GameState			state;
-GameSettings		settings;
-std::vector<Sprite>* sprites;
+ButtonKeys			keys;							// Uk³ad stanów klawiszy gracza
+Player				player;							// Kontroler gracza
+int					rayDepth[RAYS_NUM] = { 0 };		// G³êbia ka¿dego promienia
+float				frame1 = 0, frame2 = 0, fps = 0;// Klatka wykorzystana do renderowania
+GameState			state;							// Stan gry
+GameSettings		settings;						
+std::vector<Sprite>* sprites;						// Wektor renderowanych spriteów.
 
 
 
 // ---- Funkcje rysuj¹ce ----
 
+/**
+* @brief Funkcja rysuj¹ca Sprite i odpowiadaj¹ca za logikê ich poruszania siê.
+*/
 void gm_drawSprite() {
 
-	// sprawdzenie, czy gracz jest w zasiêgu interakcji ze spritem
-
+	// sprawdzenie, czy gracz jest w zasiêgu interakcji ze Spritem
 	for (int s = 0; s < sprites->size(); s++) {
 
-		// sortowanie
+		// dane do sortowania po odleg³oœci
 		sprites->at(s).dist = distance(player.x, player.y, sprites->at(s).x, sprites->at(s).y, player.angle);
 
-		// sprawdzenie czy dotknê³o siê spritea
+		// sprawdzenie czy dotknê³o siê Sprite i jego hitboxa
+		// dodatkowo, nie mo¿e to byæ Sprite typu pocisk
 		if (player.x < sprites->at(s).x + sprites->at(s).hitbox &&
 			player.x > sprites->at(s).x - sprites->at(s).hitbox &&
 			player.y < sprites->at(s).y + sprites->at(s).hitbox &&
@@ -296,12 +363,17 @@ void gm_drawSprite() {
 		// logika dla pocisków
 		if (sprites->at(s).type == BULLET) {
 
+			// niech pocisk zniknie jeœli pocisk 
+			// ¿yje d³u¿ej ni¿ przewidywany czas ¿ycia
 			if (glutGet(GLUT_ELAPSED_TIME) - sprites->at(s).spawnedAt >= sprites->at(s).liveTime) {
 				sprites->erase(sprites->begin() + s);
 				return;
 			}
 
+			// logika interakcji z ka¿dym innym Spritem
 			for (int e = 0; e < sprites->size(); e++) {
+
+				// eliminacja przeciwnika, jeœli Sprite jest typu ENEMY
 				if (sprites->at(e).type == ENEMY) {
 
 					if (sprites->at(s).x < sprites->at(e).x + sprites->at(e).hitbox &&
@@ -310,10 +382,13 @@ void gm_drawSprite() {
 						sprites->at(s).y > sprites->at(e).y - sprites->at(e).hitbox) {
 
 						sprites->erase(sprites->begin() + e);
-						e--;
+						e--;	// cofamy siê o jeden indeks
 						return;
 					}
 				}
+
+				// eliminacja Sprite jeœl jest typu CRATE albo BARREL
+				// i dodanie nowego Sprite typu COIN do tablicy globalnej sprites.
 				if (sprites->at(e).type == CRATE || sprites->at(e).type == BARREL) {
 					if (sprites->at(s).x < sprites->at(e).x + sprites->at(e).hitbox &&
 						sprites->at(s).x > sprites->at(e).x - sprites->at(e).hitbox &&
@@ -334,17 +409,22 @@ void gm_drawSprite() {
 				}
 			}
 
+			// obliczenie k¹ta poruszania siê dla Sprite
 			float dx = cos(degToRad(sprites->at(s).angle));
 			float dy = -sin(degToRad(sprites->at(s).angle));
 
-
+			// aktualizacja pozycji Sprite
 			sprites->at(s).x += dx * sprites->at(s).velocity * fps;
 			sprites->at(s).y += dy * sprites->at(s).velocity * fps;
 
 		}
 
+		// logika poruszania siê przeciwnika
+		// dzia³a TYLKO jeœli jesteœmy w trakcie gry.
 		if (sprites->at(s).type == ENEMY && gameInfo.state == GM_GAME) {
 
+			// sprawdzenie, czy gracz pojawi³ siê w zasiegu postrzegania
+			// przeciwnika
 			if (player.x < sprites->at(s).x + sprites->at(s).detectionRange &&
 				player.x > sprites->at(s).x - sprites->at(s).detectionRange &&
 				player.y < sprites->at(s).y + sprites->at(s).detectionRange &&
@@ -357,13 +437,13 @@ void gm_drawSprite() {
 
 				int offset = sprites->at(s).hitbox;
 
-				int hbx_add = ((int)sprites->at(s).x + offset) >> 6;
+				int hbx_add = ((int)sprites->at(s).x + offset) >> 6;	// pozycja + hitbox w siatce mapy
 				int hbx_sub = ((int)sprites->at(s).x - offset) >> 6;
 
 				int hby_add = ((int)sprites->at(s).y + offset) >> 6;
 				int hby_sub = ((int)sprites->at(s).y - offset) >> 6;
 
-				// kolizje dla sprite i poruszanie siê
+				// wykonaj ruch, jeœli nie ma ¿adnej kolizji ze œcian¹
 				if (player.x < sprites->at(s).x && settings.walls[hby * settings.width + hbx_sub] == 0) {
 					sprites->at(s).x -= step;
 				}
@@ -380,43 +460,48 @@ void gm_drawSprite() {
 
 		}
 
-		float spriteX = sprites->at(s).x - player.x;	// odleg³oœæ od gracza
-		float spriteY = sprites->at(s).y - player.y;
-		float spriteZ = sprites->at(s).z;
+		float spriteX = sprites->at(s).x - player.x;	// Odleg³oœæ od gracza
+		float spriteY = sprites->at(s).y - player.y;	// Odleg³oœæ od gracza
+		float spriteZ = sprites->at(s).z;				// Wysokoœæ z Spritea.
 
-		float spriteCos = cos(degToRad(player.angle));	// obrót wzglêdem gracza
-		float spriteSin = sin(degToRad(player.angle));
+		float spriteCos = cos(degToRad(player.angle));	// Obrót wzglêdem gracza
+		float spriteSin = sin(degToRad(player.angle));	// Obrót wzglêdem gracza
 
 		float a = spriteY * spriteCos + spriteX * spriteSin;
 		float b = spriteX * spriteCos - spriteY * spriteSin;
-		spriteX = a; spriteY = b;		// pozycja w przestrzeni
+		spriteX = a; spriteY = b;		// Pozycja w przestrzeni
 
-		int width = WIDTH / 8;		// ??????
-		int height = HEIGHT / 8;	// idk, ale tak musi byc
+		int width = WIDTH / 8;		// Wycentrowanie do przestrzeni mapy
+		int height = HEIGHT / 8;	// Wycentrowanie do przestrzeni mapy
 
-		float FOV = 108.0;
+		float FOV = 108.0;			// Zakres widzenia
 
-		spriteX = (spriteX * FOV / spriteY) + width / 2;
-		spriteY = (spriteZ * FOV / spriteY) + height / 2;
+		spriteX = (spriteX * FOV / spriteY) + width / 2;	// Nowe wycentrowanie do œrodka mapy.
+		spriteY = (spriteZ * FOV / spriteY) + height / 2;	// Nowe wycentrowanie do œrodka mapy.
 
-		int scale = sprites->at(s).scale * height / b;
+		int scale = sprites->at(s).scale * height / b;		// Skala renderowania
 		if (scale < 0)		scale = 0;
 		if (scale > width)	scale = width;
 
 		int x, y;
 
 		float textureX = 0, textureY = 31;
-		float textureXStep = 31.5 / (float)scale, textureYStep = 32.0 / (float)scale;	// wysokosc tekstury przez skale
+		float textureXStep = 31.5 / (float)scale, textureYStep = 32.0 / (float)scale;	// Rozmiary tekstur
 
 		for (x = spriteX - scale / 2; x < spriteX + scale / 2; x++) {
 			textureY = 31;
 			for (y = 0; y < scale; y++) {
 				if (sprites->at(s).active == 1 && x > 0 && x < 120 && b < rayDepth[x]) {
 
-					int pixel = ((int)textureY * 32 + (int)textureX) * 3 + (sprites->at(s).map * 32 * 32 * 3);
-					int red = sprites->at(s).texture[pixel + 0];
-					int green = sprites->at(s).texture[pixel + 1];
-					int blue = sprites->at(s).texture[pixel + 2];
+					// Pixel = pozycja tekstury y * wartoœci rgb + 
+					//		   pozycja tekstury x * wartoœci rgb +
+					//		   wartoœæ tekstury * wymiar(x,y) * wartoœci rgb
+					int pixel	= ((int)textureY * 32 + (int)textureX) * 3 + (sprites->at(s).map * 32 * 32 * 3);
+					int red		= sprites->at(s).texture[pixel + 0];
+					int green	= sprites->at(s).texture[pixel + 1];
+					int blue	= sprites->at(s).texture[pixel + 2];
+
+					// Ignoruj ró¿ow¹ teksturê!
 					if (!(red == 255 && green == 0 && blue == 255)) {
 						glPointSize(8);
 						glColor3ub(red, green, blue);
@@ -431,42 +516,44 @@ void gm_drawSprite() {
 			textureX += textureXStep;
 		}
 	}
+
+	// usuwanie nieaktywnych spriteów.
 	for (int s = sprites->size() - 1; s >= 0; s--) {
 		if (sprites->at(s).active == false && sprites->at(s).type != EXIT) sprites->erase(sprites->begin() + s);
 	}
+	
+	// posortuj Sprite na bazie odleg³oœci
+	// te które s¹ dalej s¹ renderowane jako pierwsze.
 	std::sort(sprites->begin(), sprites->end(), [](const Sprite& a, Sprite& b) {return a.dist > b.dist; });
 }
+/**
+*	@brief	Rysowanie mapy z lotu ptaka na ekranie.
+* Wywo³ywana po wciœniêciu przycisku mapy.
+* 
+*/
 void gm_drawMapIn2D() {
 
-	// funkcja rysuj¹ca mapê w formacie 2D.
-	/*
-		x,  y	->	po³o¿enie w uk³adzie mapy (x,y)
-		xo, yo	->	offset x, y
-
-		przerobi siê j¹ na rysowanie mapy
-	*/
-
-	int x, y, xo, yo;
+	int x, y;		// Po³o¿enie w uk³adzie mapy (x,y)
+	int xo, yo;		// Offset po³o¿enia
 
 	for (y = 0; y < settings.height; y++) {
 
 		for (x = 0; x < settings.width; x++) {
 
+			// rysowanie œcian
 			if (settings.walls[y * settings.width + x] != 0) {
-
 				// œciany oznaczone kolorem czarnym
 				glColor3f(0, 0, 0);
 			}
+			// rysowanie pustych przestrzeni
 			else if (settings.walls[y * settings.width + x] == 0) {
 
 				// puste pola oznaczone kolorem bia³ym
 				glColor3f(1, 1, 1);
 			}
 
-			xo = x * mapS / 2;
-			yo = y * mapS / 2;
-
-
+			xo = x * mapS / 2;	// Po³o¿enie, gdzie zacz¹æ rysowaæ kwadrat
+			yo = y * mapS / 2;  // Po³o¿enie, gdzie zacz¹æ rysowaæ kwadrat
 
 			glBegin(GL_QUADS);
 			glVertex2i(xo + 1, yo + 1);
@@ -477,25 +564,33 @@ void gm_drawMapIn2D() {
 		}
 	}
 }
+/**
+	@brief Rysuje znacznik gracza na mapie 2D.
+*/
 void gm_drawPlayer() {
-
-	// rysuje znacznik gracza na
-	// mapie 2D
 
 	glColor3f(1, 0, 0);
 	glPointSize(8);
 	glBegin(GL_POINTS);
-	glVertex2i(player.x / 2, player.y / 2);
+	glVertex2i(player.x / 2, player.y / 2);	// Rysuje w punkcie po³o¿enia gracza, skalowane o 2
 	glEnd();
 
+	// Rysowanie kreski kierunkowej od gracza
 	glLineWidth(3);
 	glBegin(GL_LINES);
 	glVertex2i(player.x / 2, player.y / 2);
 	glVertex2i(player.x / 2 + player.dx * 20, player.y / 2 + player.dy * 20);
 	glEnd();
 }
-void gm_castRays3D() {
+/**
+	Najwa¿niejsza funkcja rysuj¹ca programu, odpowiadaj¹ca za proces
+	ray castingu. Oblicza funkcjami trygonometrycznymi k¹ty odchylenia
+	po³o¿enia od œcian mapy, mapuj¹c je na odpowiednie tekstury i rysuj¹c je.
 
+	Walls[]  -  tablica tekstur œcian z pliku Walls.ppm
+	Floor[]  -  tablica tekstur pod³óg z pliku Floor.ppm
+*/
+void gm_castRays3D() {
 
 	/*
 		ray		->	aktualny promieñ
@@ -517,16 +612,15 @@ void gm_castRays3D() {
 		vx		->	finalny punkt padania promienia w pionie
 		vy		->	-||-
 
-		hmt		-> horizontal map texture?
+		hmt		-> pionowa tekstura mapy
 		vmt		-> jak wy¿ej
 
 	*/
-	//int ray, mpX, mpY, mpP, dof, side;
 
 	int ray, mpX, mpY, mpP = 0, dof, side;
 	float vx, vy, rayX, rayY, rayA, xOff, yOff, disV, disH;
 
-	rayA = fixAngle(player.angle + 30);		// promieñ z odstêpem 30deg
+	rayA = fixAngle(player.angle + 30);
 
 	for (ray = 0; ray < RAYS_NUM; ray++)
 	{
@@ -541,7 +635,7 @@ void gm_castRays3D() {
 
 		float Tan = tan(degToRad(rayA));
 
-		if (cos(degToRad(rayA)) > 0.001) {			// sprawdŸ lewo
+		if (cos(degToRad(rayA)) > 0.001) {			// sprawdŸ trafienie w lewy bok
 
 			rayX = (((int)player.x >> 6) << 6) + 64;
 			rayY = (player.x - rayX) * Tan + player.y;
@@ -549,14 +643,14 @@ void gm_castRays3D() {
 			yOff = -xOff * Tan;
 		}
 
-		else if (cos(degToRad(rayA)) < -0.001) {		// sprawdŸ prawo
+		else if (cos(degToRad(rayA)) < -0.001) {		// sprawdŸ trafienie w prawy bok
 			rayX = (((int)player.x >> 6) << 6) - 0.0001;
 			rayY = (player.x - rayX) * Tan + player.y;
 			xOff = -64;
 			yOff = -xOff * Tan;
 		}
 
-		// równoleg³e do pionu
+		// linia równoleg³a do pionu
 		else {
 			rayX = player.x;
 			rayY = player.y;
@@ -569,12 +663,13 @@ void gm_castRays3D() {
 			mpY = (int)(rayY) >> 6;
 			mpP = mpY * settings.width + mpX;
 
-			// sprawdzenie, czy nachodzimy na œcianê
+			// sprawdzenie, czy promieñ trafi³ w œcianê
 			if (mpP > 0 && mpP < settings.width * settings.height && settings.walls[mpP] > 0) {
-				vmt = settings.walls[mpP] - 1;
-				dof = settings.height;
+				vmt = settings.walls[mpP] - 1;	// skoro trafi³ to zapisz indeks
+				dof = settings.height;			// maksymalna g³êbia
 				disV = cos(degToRad(rayA)) * (rayX - player.x) - sin(degToRad(rayA)) * (rayY - player.y);
 			}
+			// lecimy kolejn¹ pêtlê
 			else {
 				rayX += xOff;
 				rayY += yOff;
@@ -582,6 +677,7 @@ void gm_castRays3D() {
 			}
 		}
 
+		// zapisanie pozycji promienia
 		vx = rayX;
 		vy = rayY;
 
@@ -590,21 +686,21 @@ void gm_castRays3D() {
 		dof = 0; disH = 100000;
 		Tan = 1.0 / Tan;
 
-		if (sin(degToRad(rayA)) > 0.001) { 			// sprawdzenie góra
+		if (sin(degToRad(rayA)) > 0.001) { 			// sprawdzenie górnej œciany
 			rayY = (((int)player.y >> 6) << 6) - 0.0001;
 			rayX = (player.y - rayY) * Tan + player.x;
 			yOff = -64;
 			xOff = -yOff * Tan;
 		}
 
-		else if (sin(degToRad(rayA)) < -0.001) { 		// sprawdzenie dó³
+		else if (sin(degToRad(rayA)) < -0.001) { 		// sprawdzenie dolnej œciany
 			rayY = (((int)player.y >> 6) << 6) + 64;
 			rayX = (player.y - rayY) * Tan + player.x;
 			yOff = 64;
 			xOff = -yOff * Tan;
 		}
 
-		// równoleg³e do poziomu
+		// linia równoleg³a do poziomu
 		else {
 			rayX = player.x;
 			rayY = player.y;
@@ -616,6 +712,7 @@ void gm_castRays3D() {
 			mpX = (int)(rayX) >> 6;
 			mpY = (int)(rayY) >> 6;
 			mpP = mpY * settings.width + mpX;
+			// sprawdzenie, czy promieñ trafi³ w œcianê -- jak wy¿ej
 			if (mpP > 0 && mpP < settings.width * settings.height && settings.walls[mpP] > 0) {
 				hmt = settings.walls[mpP] - 1;
 				dof = settings.width;
@@ -628,9 +725,9 @@ void gm_castRays3D() {
 			}
 		}
 
-		float shade = 1;	// do cieniowania niektórych œcian
+		float shade = 1;	// Cieniowanie œciany.
 		glColor3f(0, 0.8, 0);
-		if (disV < disH) {
+		if (disV < disH) {	// Jeœli jest to œciana pionowa
 			hmt = vmt;
 			shade = 0.5;
 			rayX = vx;
@@ -639,14 +736,14 @@ void gm_castRays3D() {
 			glColor3f(0, 0.6, 0);
 		}
 
-		int ca = fixAngle(player.angle - rayA);
+		int ca = fixAngle(player.angle - rayA);	// ró¿nica k¹tów
 		disH = disH * cos(degToRad(ca));		// finalny dystans
 		int lineH = (mapS * HEIGHT) / (disH);	// wysokoœæ rysowanej linii
 
 		float ty_step = 32.0 / (float)lineH;
 		float ty_off = 0;
 
-		if (lineH > HEIGHT) {
+		if (lineH > HEIGHT) {					// ograniczenie wysokoœci linii
 			ty_off = (lineH - HEIGHT) / 2.0;
 			lineH = HEIGHT;
 
@@ -661,7 +758,7 @@ void gm_castRays3D() {
 		float textureX;
 		if (shade == 1) {
 			textureX = (int)(rayX / 2.0) % 32;
-			if (rayA > 180) textureX = 31 - textureX;	// odbicie tekstury
+			if (rayA > 180) textureX = 31 - textureX;	// odbicie tekstury, ¿eby przypadkiem siê nie obróci³y
 		}
 		else {
 			textureX = (int)(rayY / 2.0) % 32;
@@ -669,11 +766,14 @@ void gm_castRays3D() {
 		}
 
 
+		// g³ówna pêtla rysuj¹ca
 		for (int y = 0; y < lineH; y++) {
-			int pixel = ((int)textureY * 32 + (int)textureX) * 3 + (hmt * 32 * 32 * 3);
-			int red = Walls[pixel + 0] * shade;
-			int green = Walls[pixel + 1] * shade;
-			int blue = Walls[pixel + 2] * shade;
+
+			// pobierz pixel z odpowiedniej wartoœci tekstury
+			int pixel	= ((int)textureY * 32 + (int)textureX) * 3 + (hmt * 32 * 32 * 3);
+			int red		= Walls[pixel + 0] * shade;
+			int green	= Walls[pixel + 1] * shade;
+			int blue	= Walls[pixel + 2] * shade;
 
 			glPointSize(8);
 			glColor3ub(red, green, blue);
@@ -687,21 +787,23 @@ void gm_castRays3D() {
 		// rysowanie pod³ogi
 		for (int y = lineOff + lineH; y < HEIGHT; y++) {
 
-			float dy = y - (HEIGHT / 2.0);
+			float dy = y - (HEIGHT / 2.0);	// ró¿nica wysokoœci do renderowania d³ugoœci linii
 			float deg = degToRad(rayA);
 			float raFix = cos(degToRad(fixAngle(player.angle - rayA)));
 
-			int magicNum = 190 * 32 * 2;
+			int FOV = 190 * 32 * 2;		// K¹t perspektywy dla pod³o¿a
 
-			textureX = player.x / 2 + cos(deg) * magicNum / dy / raFix;
-			textureY = player.y / 2 - sin(deg) * magicNum / dy / raFix;
+			textureX = player.x / 2 + cos(deg) * FOV / dy / raFix;
+			textureY = player.y / 2 - sin(deg) * FOV / dy / raFix;
 
+			// Punkt pod³o¿a mapy
 			int mp = settings.floor[(int)(textureY / 32.0) * settings.width + (int)(textureX / 32.0)] * 32 * 32;
 
-			int pixel = (((int)(textureY) & 31) * 32 + ((int)textureX & 31)) * 3 + mp * 3;
-			int red = Floor[pixel + 0] * 0.7;
-			int green = Floor[pixel + 1] * 0.7;
-			int blue = Floor[pixel + 2] * 0.7;
+			// pobierz pixel z odpowiedniej wartoœci tekstury
+			int pixel	= (((int)(textureY) & 31) * 32 + ((int)textureX & 31)) * 3 + mp * 3;
+			int red		= Floor[pixel + 0] * 0.7;
+			int green	= Floor[pixel + 1] * 0.7;
+			int blue	= Floor[pixel + 2] * 0.7;
 
 			glPointSize(8);
 			glColor3ub(red, green, blue);
@@ -713,6 +815,10 @@ void gm_castRays3D() {
 		rayA = fixAngle(rayA - 0.5); // kolejny promieñ
 	}
 }
+/**
+	Funkcja rysuj¹ca interfejs u¿ytkownika. W danym momencie
+	rysuje tylko broñ, z której wychodz¹ pociski.
+*/
 void gm_drawHud() {
 
 	int crossbowWidth = 128;
@@ -722,21 +828,24 @@ void gm_drawHud() {
 	for (int y = 0; y < crossbowHeight; y++) {
 		for (int x = 0; x < crossbowWidth; x++) {
 
-			int pixel = (y * crossbowWidth + x) * 3;
-			int red = Crossbow[pixel + 0];
-			int green = Crossbow[pixel + 1];
-			int blue = Crossbow[pixel + 2];
+			int pixel	= (y * crossbowWidth + x) * 3;
+			int red		= Shotgun[pixel + 0];
+			int green	= Shotgun[pixel + 1];
+			int blue	= Shotgun[pixel + 2];
 			if (!(red == 255 && green == 0 && blue == 255)) {
 
 				glPointSize(pointSize);
 				glColor3ub(red, green, blue);
 				glBegin(GL_POINTS);
-				glVertex2i(WIDTH - crossbowWidth * pointSize + x * pointSize, HEIGHT - crossbowHeight * pointSize + y * pointSize + pointSize);
+				glVertex2i(WIDTH - crossbowWidth * pointSize + x * pointSize - (WIDTH / 8), HEIGHT - crossbowHeight * pointSize + y * pointSize + pointSize);
 				glEnd();
 			}
 		}
 	}
 }
+/**
+	Funkcja rysuj¹ca skybox.
+*/
 void gm_drawSkybox() {
 
 	// aktualny obrazek ma wymiary
@@ -747,15 +856,16 @@ void gm_drawSkybox() {
 	for (int y = 0; y < skyboxHeight / 1.5; y++) {
 		for (int x = 0; x < skyboxWidth; x++) {
 
+			// Offset generowany w celu poprawnego generowania k¹ta po³o¿enia
 			int xOffset = (int)player.angle * 2 - x;
 			if (xOffset < 0) xOffset += skyboxWidth;
 			xOffset %= skyboxWidth;
 
 
-			int pixel = (y * skyboxWidth + xOffset) * 3;
-			int red = texture[pixel + 0];
-			int green = texture[pixel + 1];
-			int blue = texture[pixel + 2];
+			int pixel	= (y * skyboxWidth + xOffset) * 3;
+			int red		= texture[pixel + 0];
+			int green	= texture[pixel + 1];
+			int blue	= texture[pixel + 2];
 
 			glPointSize(9);
 			glColor3ub(red, green, blue);
@@ -765,52 +875,58 @@ void gm_drawSkybox() {
 		}
 	}
 }
+/**
+	Funkcja rysuj¹ca splashart.
+	@param[in] ScreenType screenType  -  typ ekranu do wyrenderowania.
+*/
 void gm_drawScreen(ScreenType screenType) {
 
+	// WskaŸnik do tekstury obrazu
 	int* S;
 	int pointSize;
 	int width, height;
 	switch (screenType) {
 
-	case SCR_TITLE:
-		S = Splashart_menu_title;
-		pointSize = 4;
-		width = 256;
-		height = 192;
-		break;
-	case SCR_MENU:
-		S = Splashart_menu_levels;
-		pointSize = 4;
-		width = 256;
-		height = 192;
-		break;
-	case SCR_LV_PASS:
-		S = Splashart_win;
-		pointSize = 4;
-		width = 256;
-		height = 192;
-		break;
-	case SCR_LV_FAIL:
-		S = Splashart_lose;
-		pointSize = 4;
-		width = 256;
-		height = 192;
-		break;
-	default:
-		S = Splashart_test;
-		pointSize = 1;
-		width = 1024;
-		height = 768;
-		break;
+		case SCR_TITLE:
+			S = Splashart_menu_title;
+			pointSize = 4;
+			width = 256;
+			height = 192;
+			break;
+		case SCR_MENU:
+			S = Splashart_menu_levels;
+			pointSize = 4;
+			width = 256;
+			height = 192;
+			break;
+		case SCR_LV_PASS:
+			S = Splashart_win;
+			pointSize = 4;
+			width = 256;
+			height = 192;
+			break;
+		case SCR_LV_FAIL:
+			S = Splashart_lose;
+			pointSize = 4;
+			width = 256;
+			height = 192;
+			break;
+		default:
+			S = Splashart_test;
+			pointSize = 1;
+			width = 1024;
+			height = 768;
+			break;
 	}
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 
-			int pixel = (y * width + x) * 3;
-			int red = S[pixel + 0];
-			int green = S[pixel + 1];
-			int blue = S[pixel + 2];
+			int pixel	= (y * width + x) * 3;
+			int red		= S[pixel + 0];
+			int green	= S[pixel + 1];
+			int blue	= S[pixel + 2];
+
 			glPointSize(pointSize);
 			glColor3ub(red, green, blue);
 			glBegin(GL_POINTS);
@@ -824,16 +940,32 @@ void gm_drawScreen(ScreenType screenType) {
 
 // ---- Funkcje gry ----
 
+/**
+	@brief Funkcja obs³uguj¹ca zmianê stanu gry z poziomu funkcji klikniêcia.
+	@param[in] GameState state  -  nowa wartoœæ stanu.
+*/
 void gm_handleClickSetState(GameState state) {
 	gameInfo.state = state;
 }
-void gm_placeSprite(SpriteType type, int gridX, int gridY, int offset = 0) {
+/**
+	Funkcja ustawiaj¹ca Sprite na danej pozycji w mapie.
+	@param[in] SpriteType type  -  Sprite do postawienia.
+	@param[in] int gridX  -  pozycja x, nale¿¹ca do [0, szerokoœæ).
+	@param[in] int gridY  -  pozycja y, nale¿¹ca do [0, wysokoœæ).
+
+*/
+void gm_placeSprite(SpriteType type, int gridX, int gridY) {
 
 	Sprite s(type);
 	s.x = gridX * mapS + mapS / 2;
 	s.y = gridY * mapS + mapS / 2;
 	sprites->push_back(s);
 }
+/**
+	Funkcja ustawiaj¹ca pozycjê wyjœcia z labiryntu.
+	Pobiera dane z pliku levels.json.
+	Jeœli wartoœci exitX i exitY s¹ równe -1, szuka losowego wyjœcia.
+*/
 void gm_placeExit() {
 
 	int x = -1, y = -1;
@@ -842,18 +974,27 @@ void gm_placeExit() {
 		y = settings.exitY;
 	}
 	else {
+		// indeks pozycji w siatce
 		int pos = -1;
+		//	aktualny indeks pozycji			indeks pozycji startowej gracza
 		while (pos != 0 && pos != (settings.posY * settings.width + settings.posX)) {
 			x = rand() % settings.width;
-			if (x == 0 || x == settings.width - 1) continue;
+			if (x == 0 || x == settings.width - 1) continue;	// Nie wolno stawiaæ na granicach!
 			y = rand() % settings.width;
 			if (y == 0 || y == settings.height - 1) continue;
 			pos = settings.walls[y * settings.width + x];
 		}
 	}
 	gm_placeSprite(EXIT, x, y);
-	settings.floor[y * settings.width + x] = 6;
+	settings.floor[y * settings.width + x] = 6;		// Ustawienie tekstury na zapadniê
 }
+/**
+	Funkcja ustawiaj¹ca pozycjê gracza na siatce œwiata.
+	Pobiera dane z pliku levels.json.
+	Dodatkowo ustawia k¹t, dx i dy gracza.
+	@param[in] int posX  -  pozycja startowa x w przedziale [0, szerokoœæ)
+	@param[in] int posY  -  pozycja startowa y w przedziale [0, wysokoœæ)
+*/
 void gm_placePlayer(int posX, int posY) {
 	player.x = (posX * mapS + mapS / 2) + 1.0f;//settings.posX;
 	player.y = (posY * mapS + mapS / 2);//settings.posY;
@@ -861,9 +1002,15 @@ void gm_placePlayer(int posX, int posY) {
 	player.dx = cos(degToRad(player.angle));
 	player.dy = -sin(degToRad(player.angle));
 }
-void gm_randomPlaceEntity(SpriteType type, int offset = 0) {
+/**
+	Funkcja ustawiaj¹ca pozycjê Sprite w losowym miejscu na mapie.
+	@param[in] SpriteType type  -  typ Sprite do renderowania.
+*/
+void gm_randomPlaceEntity(SpriteType type) {
 
 	int pos = -1, x = -1, y = -1;
+
+	//	aktualny indeks pozycji			indeks pozycji startowej gracza
 	while (pos != 0 && pos != (settings.posY * settings.width + settings.posX)) {
 		x = rand() % settings.width;
 		if (x == 0 || x == settings.width - 1) continue;
@@ -879,19 +1026,30 @@ void gm_randomPlaceEntity(SpriteType type, int offset = 0) {
 
 // ---- Funkcje ustawieñ ----
 
+/**
+	Funkcja inicjalizuj¹ca wymagane zmienne.
+*/
 void gm_init() {
 
 	glClearColor(0.3, 0.3, 0.3, 0);
 	sprites = new std::vector<Sprite>;
 	gameInfo.state = GM_SETUP;
 }
+/**
+	Funkcja pobieraj¹ca dane o labiryncie do wygenerowania.
+	Tutaj umieszcza siê dane odnoœnie przeciwników na planszy.
+	@param[in] int lvNum  -  numer poziom indeksowany od 1
+*/
 void gm_setupLabirynth(int lvNum) {
 
+	// Pobierz ustawienia z pliku
 	settings = fetchLabirynth(lvNum);
 
+	// Ustaw wyjœcie i gracza
 	gm_placeExit();
 	gm_placePlayer(settings.posX, settings.posY);
 
+	// Podstawowa konfiguracja
 	int enemies = 0;
 	int barrels = 2;
 	int crates = 2;
@@ -948,17 +1106,28 @@ void gm_setupLabirynth(int lvNum) {
 		gm_randomPlaceEntity(STONE);
 	}
 
+	// Zmieñ stan gry
 	gm_handleClickSetState(GM_GAME);
 }
+/**
+	Funkcja obs³uguj¹ca reakcjê na zmianê rozmiaru okna.
+	Przekazywana jako parametr do funkcji glutReshapeFunc().
+*/
 void gm_displayResize(int width, int height) {
 
 	glutReshapeWindow(WIDTH, HEIGHT);
 }
+/**
+	G³ówna funkcja wyœwietlaj¹ca i renderuj¹ca.
+	Obs³uguje zmiany stanów gry i na ich bazie wyœwietla
+	obrazy na ekranie.
+*/
 void gm_displayFunc() {
 
 	// tutaj s¹ konfiguracje odnoœnie
 	// renderowanego okienka w openglu
 
+	// Aktualizacja klatek
 	frame2 = glutGet(GLUT_ELAPSED_TIME);
 	fps = (frame2 - frame1);
 	frame1 = glutGet(GLUT_ELAPSED_TIME);
@@ -979,36 +1148,33 @@ void gm_displayFunc() {
 		gm_drawScreen(gameInfo.activeScreen);
 
 		glColor3f(1.0f, 1.0f, 1.0f);
-		glRasterPos2i(WIDTH / 8, HEIGHT / 3);
+		//glRasterPos2i(WIDTH / 8, HEIGHT / 3);
 	}
-	if (gameInfo.state == GM_MENU_LEVELS) {
+	if (gameInfo.state == GM_MENU_LEVELS) {	// wybór poziomów
 
 		gm_drawScreen(gameInfo.activeScreen);
 	}
 
-	if (gameInfo.state == GM_MAP) {
+	if (gameInfo.state == GM_MAP) {			// podgl¹d mapy
 		gameInfo.canClick = false;
 		gm_drawMapIn2D();
 		gm_drawPlayer();
 	}
 
-	if (gameInfo.state == GM_WIN) {
+	if (gameInfo.state == GM_WIN) {			// okno wygranej
 
 		gm_drawScreen(gameInfo.activeScreen);
 		glColor3f(1.0f, 1.0f, 1.0f);
-		glRasterPos2f(100, 200);
-		glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (unsigned char*)("Liczba zdobytych punktow: " + gameInfo.score));
-
 	}
-	if (gameInfo.state == GM_LOST) {
+	if (gameInfo.state == GM_LOST) {		// okno przegranej
 		gm_drawScreen(gameInfo.activeScreen);
 	}
 
 	if (gameInfo.state == GM_GAME) {	// pêtla gry
 
-		gameInfo.canClick = true;
+		gameInfo.canClick = true;		// pozwól na akcjê klikania
 
-		if (keys.a == 1) {
+		if (keys.a == 1) {				// obs³uga poruszania siê
 			player.angle += 0.2 * fps;;
 			player.angle = fixAngle(player.angle);
 			player.dx = cos(degToRad(player.angle));
@@ -1057,7 +1223,7 @@ void gm_displayFunc() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		gm_drawSkybox();
+		gm_drawSkybox();	// rysuj skybox, promienie, sprite i hud
 		gm_castRays3D();
 		gm_drawSprite();
 		gm_drawHud();
@@ -1085,8 +1251,13 @@ void gm_handleEndGame(bool gitGud) {
 
 // ---- Funkcje przycisków ----
 
+/**
+	Funkcja obs³uguj¹ca wciœniêcie przycisku.
+	Przekazywana jako parametr do funkcji glutKeyboardFunc().
+*/
 void gm_handleButtonDown(unsigned char key, int x, int y) {
 
+	// Wciœniêcie spacji w menu
 	const int spacebar = 32;
 	if (key == spacebar && gameInfo.state == GM_MENU_TITLE) {
 		gameInfo.state = GM_MENU_LEVELS;
@@ -1099,12 +1270,18 @@ void gm_handleButtonDown(unsigned char key, int x, int y) {
 	if (key == 'w')		keys.w = 1;
 	if (key == 's')		keys.s = 1;
 	if (key == 'm' && gameInfo.state == GM_GAME) 	gameInfo.state = GM_MAP;
+
+	// Wciœniêcie spacji w okienku po grze
 	if ((gameInfo.state == GM_LOST || gameInfo.state == GM_WIN) && key == spacebar) {
 		gameInfo.activeScreen = SCR_TITLE;
 		gameInfo.state = GM_SETUP;
 	}
 	glutPostRedisplay();
 }
+/**
+	Funkcja obs³uguj¹ca zwolnienie przycisku.
+	Przekazywana jako parametr do funkcji glutKeyboardUpFunc().
+*/
 void gm_handleButtonUp(unsigned char key, int x, int y) {
 
 	if (key == 'a')		keys.a = 0;
@@ -1115,8 +1292,13 @@ void gm_handleButtonUp(unsigned char key, int x, int y) {
 
 	glutPostRedisplay();
 }
+/**
+	Funkcja obs³uguj¹ca wciœniêcie przycisku myszy.
+	Przekazywana jako parametr do funkcji glutMouseFunc().
+*/
 void gm_handleClick(int button, int state, int x, int y) {
 
+	// Wybór poziomu poprzez odczyt klikniêcia
 	if (gameInfo.state == GM_MENU_LEVELS) {
 
 		if (x >= 60 && x <= 297 &&
@@ -1138,6 +1320,7 @@ void gm_handleClick(int button, int state, int x, int y) {
 		}
 	}
 
+	// Wystrzel pocisk, jeœli mo¿na
 	if (gameInfo.canClick == true && state == GLUT_DOWN && button == GLUT_LEFT_BUTTON && state != GLUT_UP) {
 		PlaySound(L"audio/shoot.wav", NULL, SND_ASYNC | SND_FILENAME);
 		Sprite bullet(BULLET);
@@ -1157,21 +1340,23 @@ int main(int argc, char* argv[]) {
 
 	srand(time(NULL));
 
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(WIDTH, HEIGHT);
-	glutCreateWindow(TITLE);
-	gluOrtho2D(0, WIDTH, HEIGHT, 0);
-	gm_init();
 
-	glutDisplayFunc(gm_displayFunc);
-	glutReshapeFunc(gm_displayResize);
+	glutInit(&argc, argv);							// zainicjuj gluta
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);	// ustaw tryb wyœwietlania
+	glutInitWindowSize(WIDTH, HEIGHT);				// stwórz okienko o wymiarad WIDTHxHEIGHT
+	glutCreateWindow(TITLE);						// dodaj tytu³ okienka
+	gluOrtho2D(0, WIDTH, HEIGHT, 0);				// ustaw perspektywê kamery
 
-	glutKeyboardFunc(gm_handleButtonDown);
-	glutKeyboardUpFunc(gm_handleButtonUp);
-	glutMouseFunc(gm_handleClick);
+	gm_init();										// zainicjuj podstawowe, wymagane zmienne
 
-	glutMainLoop();
+	glutDisplayFunc(gm_displayFunc);				// funkcja wyœwietlaj¹ca
+	glutReshapeFunc(gm_displayResize);				// funkcja nadzoru zmiany rozmiaru okna
+		
+	glutKeyboardFunc(gm_handleButtonDown);			// wciœniêcie klawisza
+	glutKeyboardUpFunc(gm_handleButtonUp);			// zwolnienie klawisza
+	glutMouseFunc(gm_handleClick);					// obs³uga przycisku myszy
+
+	glutMainLoop();									// pêtla programu
 	
 
 	return 0;

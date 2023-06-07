@@ -82,6 +82,7 @@
     <None Include="splasharts\Splashart_lose.ppm" />
     <None Include="splasharts\Splashart_win.ppm" />
     <None Include="freeglut.dll" />
+    <None Include="textures\Shotgun.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />

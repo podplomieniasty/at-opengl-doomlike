@@ -3,8 +3,18 @@
 #include <fstream>
 #include <vector>
 
+
+/**
+	Zaimportowana biblioteka do obs³ugi jsona.
+*/
 using json = nlohmann::json;
 
+/**
+	Struktura przechowuj¹ca dane o aktualnym uk³adzie pomieszczeñ.
+	Wa¿ne pozycje:
+	int posX, posY  -  pozycje startowe gracza.
+	int exitX, exitY  -  pozycje wyjœcia. -1 aby by³y losowo generowane.
+*/
 typedef struct GameSettings {
 
 	int level = 0;
@@ -20,4 +30,9 @@ typedef struct GameSettings {
 	int exitY = 0;
 };
 
+/**
+	Funkcja obs³uguj¹ca pobranie poziomu o indeksie lvNum.
+	@param[in] int lvNum  -  indeks poziomu. Poziomy indeksowane od 1.
+	@return Nowy obiekt GameSettings z uzupe³nionymi danymi.
+*/
 GameSettings fetchLabirynth(int lvNum);
