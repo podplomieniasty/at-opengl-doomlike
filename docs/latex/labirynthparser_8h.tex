@@ -1,0 +1,47 @@
+\doxysection{labirynthparser.\+h File Reference}
+\hypertarget{labirynthparser_8h}{}\label{labirynthparser_8h}\index{labirynthparser.h@{labirynthparser.h}}
+{\ttfamily \#include $<$json/json.\+h$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_game_settings}{Game\+Settings}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{labirynthparser_8h_ab701e3ac61a85b337ec5c1abaad6742d}{json}} = nlohmann\+::json
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{struct_game_settings}{Game\+Settings}} \mbox{\hyperlink{labirynthparser_8h_a1e813bdbb6f5d2932eafd1c2cfc523fa}{fetch\+Labirynth}} (int lv\+Num)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\Hypertarget{labirynthparser_8h_ab701e3ac61a85b337ec5c1abaad6742d}\label{labirynthparser_8h_ab701e3ac61a85b337ec5c1abaad6742d} 
+\index{labirynthparser.h@{labirynthparser.h}!json@{json}}
+\index{json@{json}!labirynthparser.h@{labirynthparser.h}}
+\doxysubsubsection{\texorpdfstring{json}{json}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{labirynthparser_8h_ab701e3ac61a85b337ec5c1abaad6742d}{json}} =  nlohmann\+::json}
+
+Zaimportowana biblioteka do obs³ugi jsona. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{labirynthparser_8h_a1e813bdbb6f5d2932eafd1c2cfc523fa}\label{labirynthparser_8h_a1e813bdbb6f5d2932eafd1c2cfc523fa} 
+\index{labirynthparser.h@{labirynthparser.h}!fetchLabirynth@{fetchLabirynth}}
+\index{fetchLabirynth@{fetchLabirynth}!labirynthparser.h@{labirynthparser.h}}
+\doxysubsubsection{\texorpdfstring{fetchLabirynth()}{fetchLabirynth()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_game_settings}{Game\+Settings}} fetch\+Labirynth (\begin{DoxyParamCaption}\item[{int}]{lv\+Num }\end{DoxyParamCaption})}
+
+Funkcja obs³uguj¹ca pobranie poziomu o indeksie lv\+Num. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em int} & lv\+Num -\/ indeks poziomu. Poziomy indeksowane od 1. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Nowy obiekt \doxylink{struct_game_settings}{Game\+Settings} z uzupe³nionymi danymi. 
+\end{DoxyReturn}

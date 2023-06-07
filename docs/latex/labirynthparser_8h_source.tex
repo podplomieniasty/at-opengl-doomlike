@@ -1,0 +1,29 @@
+\doxysection{labirynthparser.\+h}
+\hypertarget{labirynthparser_8h_source}{}\label{labirynthparser_8h_source}\mbox{\hyperlink{labirynthparser_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#include\ <json/json.h>}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <fstream>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{using\ }\mbox{\hyperlink{labirynthparser_8h_ab701e3ac61a85b337ec5c1abaad6742d}{json}}\ =\ nlohmann::json;}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_game_settings}{GameSettings}}\ \{}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_a617372771743c821d0cc60adde123a0c}{level}}\ =\ 0;}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_a91b3dedd3f340911406d6c2ba3fa8129}{width}}\ =\ 0;}
+\DoxyCodeLine{00022\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_aecb2d6a5ecf80577a08cc4b7e56daa91}{height}}\ =\ 0;}
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_a31555d403dfb335285d8a19039c5f708}{posX}}\ =\ 0;}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_a2fae52560c9381b72828b9def59ebe21}{posY}}\ =\ 0;}
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keywordtype}{int}*\ \mbox{\hyperlink{struct_game_settings_ab873e6306a1befa14a5da58ef2009570}{walls}}\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keywordtype}{int}*\ \mbox{\hyperlink{struct_game_settings_a91818ec76f84699bb80887422632c59e}{floor}}\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_a85cf1719bde28dee13bc95cb0f3f5cb0}{enemies}}\ =\ 0;}
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_ae4ab3401e89ffa057a2c747a4903b352}{chasers}}\ =\ 0;}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_ade081deb986d808da4e74f45b523ab30}{exitX}}\ =\ 0;}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{struct_game_settings_ab2ac6acd26f1b61fa444e84f167c282b}{exitY}}\ =\ 0;}
+\DoxyCodeLine{00031\ \};}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00038\ \mbox{\hyperlink{struct_game_settings}{GameSettings}}\ \mbox{\hyperlink{labirynthparser_8h_a1e813bdbb6f5d2932eafd1c2cfc523fa}{fetchLabirynth}}(\textcolor{keywordtype}{int}\ lvNum);}
+
+\end{DoxyCode}

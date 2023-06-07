@@ -1,3 +1,6 @@
+/**
+	@file main.cpp
+*/
 #pragma comment(lib, "winmm.lib")
 
 // ---- Biblioteki ----
@@ -9,7 +12,7 @@
 #include <GL/freeglut.h>
 #include <math.h>
 #include <vector>
-#include <algorithm>
+#include <algorithm>+
 
 #include <Windows.h>
 #include <mmsystem.h>
@@ -311,7 +314,8 @@ typedef struct {
 			y,		// pozycja Y gracza
 			dx,		// delta X
 			dy,		// delta Y
-			angle;	// k¹t po³o¿enia gracza
+			angle,
+			headbob;// k¹t po³o¿enia gracza
 } Player;
 
 
@@ -837,7 +841,7 @@ void gm_drawHud() {
 				glPointSize(pointSize);
 				glColor3ub(red, green, blue);
 				glBegin(GL_POINTS);
-				glVertex2i(WIDTH - crossbowWidth * pointSize + x * pointSize - (WIDTH / 8), HEIGHT - crossbowHeight * pointSize + y * pointSize + pointSize);
+				glVertex2i((WIDTH - crossbowWidth * pointSize + x * pointSize - (WIDTH / 8)) + cos(player.headbob) * pointSize * 2, (HEIGHT - crossbowHeight * pointSize + y * pointSize + pointSize) + sin(player.headbob) * pointSize * 2);
 				glEnd();
 			}
 		}
@@ -1001,6 +1005,7 @@ void gm_placePlayer(int posX, int posY) {
 	player.angle = fixAngle(0);
 	player.dx = cos(degToRad(player.angle));
 	player.dy = -sin(degToRad(player.angle));
+	player.headbob = 0;
 }
 /**
 	Funkcja ustawiaj¹ca pozycjê Sprite w losowym miejscu na mapie.
@@ -1071,12 +1076,13 @@ void gm_setupLabirynth(int lvNum) {
 	}
 	else if (lvNum == 2) {
 
-		gm_placeSprite(CRATE,  3, 1);
-		gm_placeSprite(BARREL, 2, 1);
-		gm_placeSprite(BARREL, 3, 3);
-		gm_placeSprite(CHAIR,  1, 2);
-
-		gm_placeSprite(ENEMY, 6, 6);
+		enemies = 5;
+		barrels = 6;
+		crates = 8;
+		coins = 10;
+		levers = 1;
+		rocks = 12;
+		stones = 15;
 
 	}
 	else if (lvNum == 3) {	// testowa plansza
@@ -1205,10 +1211,12 @@ void gm_displayFunc() {
 
 			if (settings.walls[ipy * settings.width + ipx_sub_off] == 0) {
 				player.x -= player.dx * 0.2 * fps;
+				
 			}
 			if (settings.walls[ipy_sub_off * settings.width + ipx] == 0) {
 				player.y -= player.dy * 0.2 * fps;
 			}
+			player.headbob -= 0.1;
 		}
 		if (keys.w == 1) {
 
@@ -1218,8 +1226,9 @@ void gm_displayFunc() {
 			if (settings.walls[ipy_add_off * settings.width + ipx] == 0) {
 				player.y += player.dy * 0.2 * fps;
 			}
-
+			player.headbob += 0.1;
 		}
+		player.headbob = fixAngle(player.headbob);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

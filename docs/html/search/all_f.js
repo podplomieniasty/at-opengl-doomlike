@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['s_0',['s',['../struct_button_keys.html#a131bb4843e65c458d9992e410a72d9ff',1,'ButtonKeys']]],
+  ['scale_1',['scale',['../struct_sprite.html#a8e5eae0ba00a77e6527f6a1374987efa',1,'Sprite']]],
+  ['score_2',['score',['../struct_game_info.html#ac46b9867fe4baf039bb1ebb132f1168f',1,'GameInfo']]],
+  ['scr_5fgame_3',['SCR_GAME',['../main_8cpp.html#a9f5ff9109158e83287c5c888bf7bb8a7aa15184675a4c07ff3001e60c01207aff',1,'main.cpp']]],
+  ['scr_5flv_5ffail_4',['SCR_LV_FAIL',['../main_8cpp.html#a9f5ff9109158e83287c5c888bf7bb8a7a14cb8797ecfd2dc2282c5a53a7e11b08',1,'main.cpp']]],
+  ['scr_5flv_5fpass_5',['SCR_LV_PASS',['../main_8cpp.html#a9f5ff9109158e83287c5c888bf7bb8a7ac1ce8ca4dd3fc5e32c87e1c88e8c0839',1,'main.cpp']]],
+  ['scr_5fmenu_6',['SCR_MENU',['../main_8cpp.html#a9f5ff9109158e83287c5c888bf7bb8a7aa1503adc710f4e415b9a7c2b1cfe3611',1,'main.cpp']]],
+  ['scr_5ftitle_7',['SCR_TITLE',['../main_8cpp.html#a9f5ff9109158e83287c5c888bf7bb8a7ab56770f9f8ca8ae73a583f9bdb3e8107',1,'main.cpp']]],
+  ['screentype_8',['ScreenType',['../main_8cpp.html#a9f5ff9109158e83287c5c888bf7bb8a7',1,'main.cpp']]],
+  ['settings_9',['settings',['../main_8cpp.html#ad595baaa852c5d39f4429a7e6b91c76c',1,'main.cpp']]],
+  ['spawnedat_10',['spawnedAt',['../struct_sprite.html#ac62bcd806657fa9a5f62d07b62c704bc',1,'Sprite']]],
+  ['sprite_11',['Sprite',['../struct_sprite.html',1,'Sprite'],['../struct_sprite.html#a2e5ead92de7305a03b11a0b952d460e1',1,'Sprite::Sprite()']]],
+  ['sprites_12',['sprites',['../main_8cpp.html#ad83f3a1752116c2160a45fd4a96170a6',1,'main.cpp']]],
+  ['spritetype_13',['SpriteType',['../main_8cpp.html#ac6fa10729dffeb6a192492f13c25e31a',1,'main.cpp']]],
+  ['state_14',['state',['../struct_game_info.html#aaed3cfba8e40878dd332bcebfa58d939',1,'GameInfo::state'],['../main_8cpp.html#a25362b33bad9ff6222dc40646c411649',1,'state:&#160;main.cpp']]],
+  ['step_15',['step',['../struct_sprite.html#a1a7114606047b4e76bf2a6f058494400',1,'Sprite']]],
+  ['stone_16',['STONE',['../main_8cpp.html#ac6fa10729dffeb6a192492f13c25e31aa0fca859752b1db047acd56aca4021d2d',1,'main.cpp']]]
+];

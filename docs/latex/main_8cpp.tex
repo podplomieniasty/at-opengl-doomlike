@@ -1,0 +1,672 @@
+\doxysection{main.\+cpp File Reference}
+\hypertarget{main_8cpp}{}\label{main_8cpp}\index{main.cpp@{main.cpp}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$GL/glut.\+h$>$}\newline
+{\ttfamily \#include $<$GL/freeglut.\+h$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$Windows.\+h$>$}\newline
+{\ttfamily \#include $<$mmsystem.\+h$>$}\newline
+{\ttfamily \#include \"{}labirynthparser.\+h\"{}}\newline
+{\ttfamily \#include \"{}textures/\+Skybox\+\_\+01.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}textures/\+Floor.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}textures/\+Walls.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}textures/\+Shotgun.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}textures/\+Amogus\+\_\+01.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}textures/\+Chaser.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}textures/\+Sprites.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}splasharts/\+Splashart\+\_\+menu\+\_\+title.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}splasharts/\+Splashart\+\_\+menu\+\_\+levels.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}splasharts/\+Splashart\+\_\+test.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}splasharts/\+Splashart\+\_\+win.\+ppm\"{}}\newline
+{\ttfamily \#include \"{}splasharts/\+Splashart\+\_\+lose.\+ppm\"{}}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_button_keys}{Button\+Keys}}
+\item 
+struct \mbox{\hyperlink{struct_game_info}{Game\+Info}}
+\item 
+struct \mbox{\hyperlink{struct_sprite}{Sprite}}
+\item 
+struct \mbox{\hyperlink{struct_player}{Player}}
+\begin{DoxyCompactList}\small\item\em Struktura przechowuj¹ca dane o graczu. Wymaga inicjalizacji funkcj¹ \doxylink{main_8cpp_a0956c936cb9281e26f90b656acc87f05}{gm\+\_\+place\+Player()}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{main_8cpp_a598a3330b3c21701223ee0ca14316eca}{PI}}~3.\+1415926535
+\item 
+\#define \mbox{\hyperlink{main_8cpp_a536e48026a77f8365359a33a3e0eb726}{DEG}}~0.\+0174533
+\item 
+\#define \mbox{\hyperlink{main_8cpp_a241aeeb764887ae5e3de58b98f04b16d}{WIDTH}}~1024
+\item 
+\#define \mbox{\hyperlink{main_8cpp_aed89bd71aee8be823e8a20ec4e093c1e}{HEIGHT}}~768
+\item 
+\#define \mbox{\hyperlink{main_8cpp_a60a56c499875b57369f7ef3a5a227cb9}{TITLE}}~\"{}Raycasting -\/ Bialas, Burzec i Kijowski\"{}
+\item 
+\#define \mbox{\hyperlink{main_8cpp_a529d5ebb449edf31d9835d13f4fb9f89}{MAP\+\_\+\+HEIGHT}}~320
+\item 
+\#define \mbox{\hyperlink{main_8cpp_a2a9179924a2f1aa3ef928c389be60a07}{mapS}}~64
+\item 
+\#define \mbox{\hyperlink{main_8cpp_ab421473d9dab67510c7518f0ed3b7510}{RAYS\+\_\+\+NUM}}~240
+\begin{DoxyCompactList}\small\item\em Iloœæ promieni do wyrenderowania na ekranie. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}} \{ \newline
+\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa5ce368bdfc444a87fef6c208b4101571}{ENEMY}} = 1
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa609449587c3c063b242b58e69b0e9586}{CHASER}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aaa0ad761321ff6ba67fccf92945615e31}{LEVER}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa4f5f01d53acb849896daaed9fdbae39d}{BULLET}}
+, \newline
+\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa3db211bb0d30db282da5a13b354f69c8}{COIN}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aabd8ef7b1148faa1e6ed98ca45d059ab2}{CRATE}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aad07eaac1008d2da0ad0b454f2de543bc}{BARREL}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aaf22dd52e73ff93270cf47648e40f2aaf}{BARREL\+\_\+\+BOOM}}
+, \newline
+\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aab39e373af8c527684a4f0ded36bd961c}{ROCK}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa0fca859752b1db047acd56aca4021d2d}{STONE}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa5e17eb38adb4fb5e119e94614b878809}{CHAIR}}
+, \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa7a10b5d68d31711288e1fe0fa17dbf4f}{EXIT}}
+ \}
+\begin{DoxyCompactList}\small\item\em Typ sprite do wyrenderowania na ekran. \end{DoxyCompactList}\item 
+enum \mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7}{Screen\+Type}} \{ \newline
+\mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7ab56770f9f8ca8ae73a583f9bdb3e8107}{SCR\+\_\+\+TITLE}} = 1
+, \mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7aa1503adc710f4e415b9a7c2b1cfe3611}{SCR\+\_\+\+MENU}}
+, \mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7aa15184675a4c07ff3001e60c01207aff}{SCR\+\_\+\+GAME}}
+, \mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7ac1ce8ca4dd3fc5e32c87e1c88e8c0839}{SCR\+\_\+\+LV\+\_\+\+PASS}}
+, \newline
+\mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7a14cb8797ecfd2dc2282c5a53a7e11b08}{SCR\+\_\+\+LV\+\_\+\+FAIL}}
+ \}
+\begin{DoxyCompactList}\small\item\em Typ obrazu do wyrenderowania na ekranie. \end{DoxyCompactList}\item 
+enum \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}} \{ \newline
+\mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a6f9e0d17512f5354eb24a192bae12563}{GM\+\_\+\+SETUP}} = 0
+, \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a2c80bbb9811ab41ca4bb5b4aa6de3c62}{GM\+\_\+\+MENU\+\_\+\+TITLE}}
+, \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a97115fd0a05138a43e2f079a904a9418}{GM\+\_\+\+MENU\+\_\+\+LEVELS}}
+, \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a470233f4b144e5e62c63096ada76782a}{GM\+\_\+\+GAME}}
+, \newline
+\mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a0b52d708fed1b87c065e9167febbfc60}{GM\+\_\+\+WIN}}
+, \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285aa937d67438d77727945886e85067fdb9}{GM\+\_\+\+LOST}}
+, \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a995b48832d2b8cb737dcdac7559ec5a6}{GM\+\_\+\+MAP}}
+ \}
+\begin{DoxyCompactList}\small\item\em Typ stanu gry. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{main_8cpp_af9dec5c33de6c7c429939179ac78920e}{gm\+\_\+handle\+End\+Game}} (bool git\+Gud=false)
+\begin{DoxyCompactList}\small\item\em Funkcja do wyœwietlenia ekranu przegranej / wygranej. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{main_8cpp_a6109169871ec420ff713db24837f7188}{deg\+To\+Rad}} (float a)
+\begin{DoxyCompactList}\small\item\em Funkcja zamieniaj¹ca stopnie na radiany. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{main_8cpp_a90809e8556051bfd91acfb0e48accb7e}{fix\+Angle}} (float a)
+\begin{DoxyCompactList}\small\item\em Funkcja umieszczaj¹ca k¹t w przedziale \mbox{[}0, 359). \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{main_8cpp_aa1703cd91cf6b9df8e9a4651ac021454}{distance}} (float ax, float ay, float bx, float by, float angle)
+\begin{DoxyCompactList}\small\item\em Obliczaj¹ca dystans pomiêdzy dwoma punktami na mapie. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8cpp_a7ecafd727355b79004bbf872fe72910e}{gm\+\_\+draw\+Sprite}} ()
+\begin{DoxyCompactList}\small\item\em Funkcja rysuj¹ca \doxylink{struct_sprite}{Sprite} i odpowiadaj¹ca za logikê ich poruszania siê. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8cpp_a85f8b733bc3e4de1cdc9c5199dce8f9c}{gm\+\_\+draw\+Map\+In2D}} ()
+\begin{DoxyCompactList}\small\item\em Rysowanie mapy z lotu ptaka na ekranie. Wywo³ywana po wciœniêciu przycisku mapy. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8cpp_aed6cd5c7229cd91c6e665f3e68fcc6c2}{gm\+\_\+draw\+Player}} ()
+\begin{DoxyCompactList}\small\item\em Rysuje znacznik gracza na mapie 2D. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8cpp_aeefe31db01933beed30b1cf934e4c88b}{gm\+\_\+cast\+Rays3D}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a072841c8288832538a3ee221612217cf}{gm\+\_\+draw\+Hud}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_ad90003f16ecb4419449aa1bdf827b7a0}{gm\+\_\+draw\+Skybox}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a585d6b687a82ad5402494ae2f77d2ef7}{gm\+\_\+draw\+Screen}} (\mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7}{Screen\+Type}} screen\+Type)
+\item 
+void \mbox{\hyperlink{main_8cpp_a0fd34a4f5b74bae73d0552f3f11553e5}{gm\+\_\+handle\+Click\+Set\+State}} (\mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}} \mbox{\hyperlink{main_8cpp_a25362b33bad9ff6222dc40646c411649}{state}})
+\begin{DoxyCompactList}\small\item\em Funkcja obs³uguj¹ca zmianê stanu gry z poziomu funkcji klikniêcia. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8cpp_a0ad1ee2c569626274b332d33254a7ec6}{gm\+\_\+place\+Sprite}} (\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}} type, int gridX, int gridY)
+\item 
+void \mbox{\hyperlink{main_8cpp_a5e522270d8294df40927321ae25c3235}{gm\+\_\+place\+Exit}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a0956c936cb9281e26f90b656acc87f05}{gm\+\_\+place\+Player}} (int posX, int posY)
+\item 
+void \mbox{\hyperlink{main_8cpp_a577feace0c8bb6a01568ab5d6929a1dd}{gm\+\_\+random\+Place\+Entity}} (\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}} type)
+\item 
+void \mbox{\hyperlink{main_8cpp_a1071eb4d72f4c2f397742a23b070a3ac}{gm\+\_\+init}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_aaa4e5ae4b3716bc2e534386879c8abaf}{gm\+\_\+setup\+Labirynth}} (int lv\+Num)
+\item 
+void \mbox{\hyperlink{main_8cpp_a2e1faddc1e86159ceffbb9e11690ad87}{gm\+\_\+display\+Resize}} (int width, int height)
+\item 
+void \mbox{\hyperlink{main_8cpp_a54d941f70bc3a42b46a6a67188121931}{gm\+\_\+display\+Func}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a10761c0982addc90d08e5da88e00dc64}{gm\+\_\+handle\+Button\+Down}} (unsigned char key, int x, int y)
+\item 
+void \mbox{\hyperlink{main_8cpp_a6ba99a1eeb09529f39f0d4d93b0713ba}{gm\+\_\+handle\+Button\+Up}} (unsigned char key, int x, int y)
+\item 
+void \mbox{\hyperlink{main_8cpp_a96b6ca0aec318fed43d9cea72935ab25}{gm\+\_\+handle\+Click}} (int button, int \mbox{\hyperlink{main_8cpp_a25362b33bad9ff6222dc40646c411649}{state}}, int x, int y)
+\item 
+int \mbox{\hyperlink{main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char \texorpdfstring{$\ast$}{*}argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{struct_game_info}{Game\+Info}} \mbox{\hyperlink{main_8cpp_a4089233ede3ad3ba9618e76697aeda27}{game\+Info}}
+\item 
+\mbox{\hyperlink{struct_button_keys}{Button\+Keys}} \mbox{\hyperlink{main_8cpp_a27a06ed7f9efe0fd0986e227c6735cb2}{keys}}
+\item 
+\mbox{\hyperlink{struct_player}{Player}} \mbox{\hyperlink{main_8cpp_af61d6983a9396a11078805087518af88}{player}}
+\item 
+int \mbox{\hyperlink{main_8cpp_af6cf398a3f82b8e5ddc20dcd2873483e}{ray\+Depth}} \mbox{[}\mbox{\hyperlink{main_8cpp_ab421473d9dab67510c7518f0ed3b7510}{RAYS\+\_\+\+NUM}}\mbox{]} = \{ 0 \}
+\item 
+float \mbox{\hyperlink{main_8cpp_ac5b54fda187f8487bb464b1851b1af48}{frame1}} = 0
+\item 
+float \mbox{\hyperlink{main_8cpp_a3655ce19f8a959dcb84b2bc8242c8b5a}{frame2}} = 0
+\item 
+float \mbox{\hyperlink{main_8cpp_a4f50e96f11c68d45dc109185efe011ad}{fps}} = 0
+\item 
+\mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}} \mbox{\hyperlink{main_8cpp_a25362b33bad9ff6222dc40646c411649}{state}}
+\item 
+\mbox{\hyperlink{struct_game_settings}{Game\+Settings}} \mbox{\hyperlink{main_8cpp_ad595baaa852c5d39f4429a7e6b91c76c}{settings}}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{struct_sprite}{Sprite}} $>$ \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{main_8cpp_ad83f3a1752116c2160a45fd4a96170a6}{sprites}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{main_8cpp_a536e48026a77f8365359a33a3e0eb726}\label{main_8cpp_a536e48026a77f8365359a33a3e0eb726} 
+\index{main.cpp@{main.cpp}!DEG@{DEG}}
+\index{DEG@{DEG}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{DEG}{DEG}}
+{\footnotesize\ttfamily \#define DEG~0.\+0174533}
+
+\Hypertarget{main_8cpp_aed89bd71aee8be823e8a20ec4e093c1e}\label{main_8cpp_aed89bd71aee8be823e8a20ec4e093c1e} 
+\index{main.cpp@{main.cpp}!HEIGHT@{HEIGHT}}
+\index{HEIGHT@{HEIGHT}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{HEIGHT}{HEIGHT}}
+{\footnotesize\ttfamily \#define HEIGHT~768}
+
+\Hypertarget{main_8cpp_a529d5ebb449edf31d9835d13f4fb9f89}\label{main_8cpp_a529d5ebb449edf31d9835d13f4fb9f89} 
+\index{main.cpp@{main.cpp}!MAP\_HEIGHT@{MAP\_HEIGHT}}
+\index{MAP\_HEIGHT@{MAP\_HEIGHT}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{MAP\_HEIGHT}{MAP\_HEIGHT}}
+{\footnotesize\ttfamily \#define MAP\+\_\+\+HEIGHT~320}
+
+\Hypertarget{main_8cpp_a2a9179924a2f1aa3ef928c389be60a07}\label{main_8cpp_a2a9179924a2f1aa3ef928c389be60a07} 
+\index{main.cpp@{main.cpp}!mapS@{mapS}}
+\index{mapS@{mapS}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mapS}{mapS}}
+{\footnotesize\ttfamily \#define mapS~64}
+
+\Hypertarget{main_8cpp_a598a3330b3c21701223ee0ca14316eca}\label{main_8cpp_a598a3330b3c21701223ee0ca14316eca} 
+\index{main.cpp@{main.cpp}!PI@{PI}}
+\index{PI@{PI}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{PI}{PI}}
+{\footnotesize\ttfamily \#define PI~3.\+1415926535}
+
+Wszystkie tekstury s¹ odczytywane z plików PPM, gdzie s¹ importowane tablice intów reprezentuj¹ce kolory RGB. \Hypertarget{main_8cpp_ab421473d9dab67510c7518f0ed3b7510}\label{main_8cpp_ab421473d9dab67510c7518f0ed3b7510} 
+\index{main.cpp@{main.cpp}!RAYS\_NUM@{RAYS\_NUM}}
+\index{RAYS\_NUM@{RAYS\_NUM}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{RAYS\_NUM}{RAYS\_NUM}}
+{\footnotesize\ttfamily \#define RAYS\+\_\+\+NUM~240}
+
+
+
+Iloœæ promieni do wyrenderowania na ekranie. 
+
+\Hypertarget{main_8cpp_a60a56c499875b57369f7ef3a5a227cb9}\label{main_8cpp_a60a56c499875b57369f7ef3a5a227cb9} 
+\index{main.cpp@{main.cpp}!TITLE@{TITLE}}
+\index{TITLE@{TITLE}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{TITLE}{TITLE}}
+{\footnotesize\ttfamily \#define TITLE~\"{}Raycasting -\/ Bialas, Burzec i Kijowski\"{}}
+
+\Hypertarget{main_8cpp_a241aeeb764887ae5e3de58b98f04b16d}\label{main_8cpp_a241aeeb764887ae5e3de58b98f04b16d} 
+\index{main.cpp@{main.cpp}!WIDTH@{WIDTH}}
+\index{WIDTH@{WIDTH}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{WIDTH}{WIDTH}}
+{\footnotesize\ttfamily \#define WIDTH~1024}
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285} 
+\index{main.cpp@{main.cpp}!GameState@{GameState}}
+\index{GameState@{GameState}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{GameState}{GameState}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}}}
+
+
+
+Typ stanu gry. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{GM\_SETUP@{GM\_SETUP}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!GM\_SETUP@{GM\_SETUP}}}\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a6f9e0d17512f5354eb24a192bae12563}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a6f9e0d17512f5354eb24a192bae12563} 
+GM\+\_\+\+SETUP&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{GM\_MENU\_TITLE@{GM\_MENU\_TITLE}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!GM\_MENU\_TITLE@{GM\_MENU\_TITLE}}}\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a2c80bbb9811ab41ca4bb5b4aa6de3c62}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a2c80bbb9811ab41ca4bb5b4aa6de3c62} 
+GM\+\_\+\+MENU\+\_\+\+TITLE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{GM\_MENU\_LEVELS@{GM\_MENU\_LEVELS}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!GM\_MENU\_LEVELS@{GM\_MENU\_LEVELS}}}\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a97115fd0a05138a43e2f079a904a9418}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a97115fd0a05138a43e2f079a904a9418} 
+GM\+\_\+\+MENU\+\_\+\+LEVELS&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{GM\_GAME@{GM\_GAME}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!GM\_GAME@{GM\_GAME}}}\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a470233f4b144e5e62c63096ada76782a}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a470233f4b144e5e62c63096ada76782a} 
+GM\+\_\+\+GAME&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{GM\_WIN@{GM\_WIN}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!GM\_WIN@{GM\_WIN}}}\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a0b52d708fed1b87c065e9167febbfc60}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a0b52d708fed1b87c065e9167febbfc60} 
+GM\+\_\+\+WIN&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{GM\_LOST@{GM\_LOST}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!GM\_LOST@{GM\_LOST}}}\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285aa937d67438d77727945886e85067fdb9}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285aa937d67438d77727945886e85067fdb9} 
+GM\+\_\+\+LOST&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{GM\_MAP@{GM\_MAP}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!GM\_MAP@{GM\_MAP}}}\Hypertarget{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a995b48832d2b8cb737dcdac7559ec5a6}\label{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285a995b48832d2b8cb737dcdac7559ec5a6} 
+GM\+\_\+\+MAP&\\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7}\label{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7} 
+\index{main.cpp@{main.cpp}!ScreenType@{ScreenType}}
+\index{ScreenType@{ScreenType}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{ScreenType}{ScreenType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7}{Screen\+Type}}}
+
+
+
+Typ obrazu do wyrenderowania na ekranie. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SCR\_TITLE@{SCR\_TITLE}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!SCR\_TITLE@{SCR\_TITLE}}}\Hypertarget{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7ab56770f9f8ca8ae73a583f9bdb3e8107}\label{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7ab56770f9f8ca8ae73a583f9bdb3e8107} 
+SCR\+\_\+\+TITLE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SCR\_MENU@{SCR\_MENU}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!SCR\_MENU@{SCR\_MENU}}}\Hypertarget{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7aa1503adc710f4e415b9a7c2b1cfe3611}\label{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7aa1503adc710f4e415b9a7c2b1cfe3611} 
+SCR\+\_\+\+MENU&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SCR\_GAME@{SCR\_GAME}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!SCR\_GAME@{SCR\_GAME}}}\Hypertarget{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7aa15184675a4c07ff3001e60c01207aff}\label{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7aa15184675a4c07ff3001e60c01207aff} 
+SCR\+\_\+\+GAME&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SCR\_LV\_PASS@{SCR\_LV\_PASS}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!SCR\_LV\_PASS@{SCR\_LV\_PASS}}}\Hypertarget{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7ac1ce8ca4dd3fc5e32c87e1c88e8c0839}\label{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7ac1ce8ca4dd3fc5e32c87e1c88e8c0839} 
+SCR\+\_\+\+LV\+\_\+\+PASS&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SCR\_LV\_FAIL@{SCR\_LV\_FAIL}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!SCR\_LV\_FAIL@{SCR\_LV\_FAIL}}}\Hypertarget{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7a14cb8797ecfd2dc2282c5a53a7e11b08}\label{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7a14cb8797ecfd2dc2282c5a53a7e11b08} 
+SCR\+\_\+\+LV\+\_\+\+FAIL&\\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a} 
+\index{main.cpp@{main.cpp}!SpriteType@{SpriteType}}
+\index{SpriteType@{SpriteType}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{SpriteType}{SpriteType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}}}
+
+
+
+Typ sprite do wyrenderowania na ekran. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ENEMY@{ENEMY}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!ENEMY@{ENEMY}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa5ce368bdfc444a87fef6c208b4101571}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa5ce368bdfc444a87fef6c208b4101571} 
+ENEMY&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHASER@{CHASER}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!CHASER@{CHASER}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa609449587c3c063b242b58e69b0e9586}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa609449587c3c063b242b58e69b0e9586} 
+CHASER&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LEVER@{LEVER}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!LEVER@{LEVER}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aaa0ad761321ff6ba67fccf92945615e31}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aaa0ad761321ff6ba67fccf92945615e31} 
+LEVER&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{BULLET@{BULLET}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!BULLET@{BULLET}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa4f5f01d53acb849896daaed9fdbae39d}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa4f5f01d53acb849896daaed9fdbae39d} 
+BULLET&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{COIN@{COIN}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!COIN@{COIN}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa3db211bb0d30db282da5a13b354f69c8}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa3db211bb0d30db282da5a13b354f69c8} 
+COIN&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CRATE@{CRATE}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!CRATE@{CRATE}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aabd8ef7b1148faa1e6ed98ca45d059ab2}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aabd8ef7b1148faa1e6ed98ca45d059ab2} 
+CRATE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{BARREL@{BARREL}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!BARREL@{BARREL}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aad07eaac1008d2da0ad0b454f2de543bc}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aad07eaac1008d2da0ad0b454f2de543bc} 
+BARREL&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{BARREL\_BOOM@{BARREL\_BOOM}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!BARREL\_BOOM@{BARREL\_BOOM}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aaf22dd52e73ff93270cf47648e40f2aaf}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aaf22dd52e73ff93270cf47648e40f2aaf} 
+BARREL\+\_\+\+BOOM&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ROCK@{ROCK}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!ROCK@{ROCK}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aab39e373af8c527684a4f0ded36bd961c}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aab39e373af8c527684a4f0ded36bd961c} 
+ROCK&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STONE@{STONE}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!STONE@{STONE}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa0fca859752b1db047acd56aca4021d2d}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa0fca859752b1db047acd56aca4021d2d} 
+STONE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAIR@{CHAIR}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!CHAIR@{CHAIR}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa5e17eb38adb4fb5e119e94614b878809}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa5e17eb38adb4fb5e119e94614b878809} 
+CHAIR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{EXIT@{EXIT}!main.cpp@{main.cpp}}\index{main.cpp@{main.cpp}!EXIT@{EXIT}}}\Hypertarget{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa7a10b5d68d31711288e1fe0fa17dbf4f}\label{main_8cpp_ac6fa10729dffeb6a192492f13c25e31aa7a10b5d68d31711288e1fe0fa17dbf4f} 
+EXIT&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{main_8cpp_a6109169871ec420ff713db24837f7188}\label{main_8cpp_a6109169871ec420ff713db24837f7188} 
+\index{main.cpp@{main.cpp}!degToRad@{degToRad}}
+\index{degToRad@{degToRad}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{degToRad()}{degToRad()}}
+{\footnotesize\ttfamily float deg\+To\+Rad (\begin{DoxyParamCaption}\item[{float}]{a }\end{DoxyParamCaption})}
+
+
+
+Funkcja zamieniaj¹ca stopnie na radiany. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em float} & a -\/ stopieñ k¹ta. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+K¹t w radianach. 
+\end{DoxyReturn}
+\Hypertarget{main_8cpp_aa1703cd91cf6b9df8e9a4651ac021454}\label{main_8cpp_aa1703cd91cf6b9df8e9a4651ac021454} 
+\index{main.cpp@{main.cpp}!distance@{distance}}
+\index{distance@{distance}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{distance()}{distance()}}
+{\footnotesize\ttfamily float distance (\begin{DoxyParamCaption}\item[{float}]{ax,  }\item[{float}]{ay,  }\item[{float}]{bx,  }\item[{float}]{by,  }\item[{float}]{angle }\end{DoxyParamCaption})}
+
+
+
+Obliczaj¹ca dystans pomiêdzy dwoma punktami na mapie. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em float} & ax, ay -\/ po³o¿enie punktu a. \\
+\hline
+\mbox{\texttt{ in}}  & {\em float} & bx, by -\/ po³o¿enie punktu b. \\
+\hline
+\mbox{\texttt{ in}}  & {\em float} & angle -\/ k¹t po³o¿enia. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Odleg³oœæ pomiêdzy punktami. 
+\end{DoxyReturn}
+\Hypertarget{main_8cpp_a90809e8556051bfd91acfb0e48accb7e}\label{main_8cpp_a90809e8556051bfd91acfb0e48accb7e} 
+\index{main.cpp@{main.cpp}!fixAngle@{fixAngle}}
+\index{fixAngle@{fixAngle}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{fixAngle()}{fixAngle()}}
+{\footnotesize\ttfamily float fix\+Angle (\begin{DoxyParamCaption}\item[{float}]{a }\end{DoxyParamCaption})}
+
+
+
+Funkcja umieszczaj¹ca k¹t w przedziale \mbox{[}0, 359). 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em float} & a -\/ stopieñ k¹ta. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Poprawiony k¹t. 
+\end{DoxyReturn}
+\Hypertarget{main_8cpp_aeefe31db01933beed30b1cf934e4c88b}\label{main_8cpp_aeefe31db01933beed30b1cf934e4c88b} 
+\index{main.cpp@{main.cpp}!gm\_castRays3D@{gm\_castRays3D}}
+\index{gm\_castRays3D@{gm\_castRays3D}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_castRays3D()}{gm\_castRays3D()}}
+{\footnotesize\ttfamily void gm\+\_\+cast\+Rays3D (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Najwa¿niejsza funkcja rysuj¹ca programu, odpowiadaj¹ca za proces ray castingu. Oblicza funkcjami trygonometrycznymi k¹ty odchylenia po³o¿enia od œcian mapy, mapuj¹c je na odpowiednie tekstury i rysuj¹c je.
+
+Walls\mbox{[}\mbox{]} -\/ tablica tekstur œcian z pliku Walls.\+ppm Floor\mbox{[}\mbox{]} -\/ tablica tekstur pod³óg z pliku Floor.\+ppm \Hypertarget{main_8cpp_a54d941f70bc3a42b46a6a67188121931}\label{main_8cpp_a54d941f70bc3a42b46a6a67188121931} 
+\index{main.cpp@{main.cpp}!gm\_displayFunc@{gm\_displayFunc}}
+\index{gm\_displayFunc@{gm\_displayFunc}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_displayFunc()}{gm\_displayFunc()}}
+{\footnotesize\ttfamily void gm\+\_\+display\+Func (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+G³ówna funkcja wyœwietlaj¹ca i renderuj¹ca. Obs³uguje zmiany stanów gry i na ich bazie wyœwietla obrazy na ekranie. \Hypertarget{main_8cpp_a2e1faddc1e86159ceffbb9e11690ad87}\label{main_8cpp_a2e1faddc1e86159ceffbb9e11690ad87} 
+\index{main.cpp@{main.cpp}!gm\_displayResize@{gm\_displayResize}}
+\index{gm\_displayResize@{gm\_displayResize}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_displayResize()}{gm\_displayResize()}}
+{\footnotesize\ttfamily void gm\+\_\+display\+Resize (\begin{DoxyParamCaption}\item[{int}]{width,  }\item[{int}]{height }\end{DoxyParamCaption})}
+
+Funkcja obs³uguj¹ca reakcjê na zmianê rozmiaru okna. Przekazywana jako parametr do funkcji glut\+Reshape\+Func(). \Hypertarget{main_8cpp_a072841c8288832538a3ee221612217cf}\label{main_8cpp_a072841c8288832538a3ee221612217cf} 
+\index{main.cpp@{main.cpp}!gm\_drawHud@{gm\_drawHud}}
+\index{gm\_drawHud@{gm\_drawHud}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_drawHud()}{gm\_drawHud()}}
+{\footnotesize\ttfamily void gm\+\_\+draw\+Hud (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Funkcja rysuj¹ca interfejs u¿ytkownika. W danym momencie rysuje tylko broñ, z której wychodz¹ pociski. \Hypertarget{main_8cpp_a85f8b733bc3e4de1cdc9c5199dce8f9c}\label{main_8cpp_a85f8b733bc3e4de1cdc9c5199dce8f9c} 
+\index{main.cpp@{main.cpp}!gm\_drawMapIn2D@{gm\_drawMapIn2D}}
+\index{gm\_drawMapIn2D@{gm\_drawMapIn2D}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_drawMapIn2D()}{gm\_drawMapIn2D()}}
+{\footnotesize\ttfamily void gm\+\_\+draw\+Map\+In2D (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Rysowanie mapy z lotu ptaka na ekranie. Wywo³ywana po wciœniêciu przycisku mapy. 
+
+\Hypertarget{main_8cpp_aed6cd5c7229cd91c6e665f3e68fcc6c2}\label{main_8cpp_aed6cd5c7229cd91c6e665f3e68fcc6c2} 
+\index{main.cpp@{main.cpp}!gm\_drawPlayer@{gm\_drawPlayer}}
+\index{gm\_drawPlayer@{gm\_drawPlayer}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_drawPlayer()}{gm\_drawPlayer()}}
+{\footnotesize\ttfamily void gm\+\_\+draw\+Player (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Rysuje znacznik gracza na mapie 2D. 
+
+\Hypertarget{main_8cpp_a585d6b687a82ad5402494ae2f77d2ef7}\label{main_8cpp_a585d6b687a82ad5402494ae2f77d2ef7} 
+\index{main.cpp@{main.cpp}!gm\_drawScreen@{gm\_drawScreen}}
+\index{gm\_drawScreen@{gm\_drawScreen}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_drawScreen()}{gm\_drawScreen()}}
+{\footnotesize\ttfamily void gm\+\_\+draw\+Screen (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{main_8cpp_a9f5ff9109158e83287c5c888bf7bb8a7}{Screen\+Type}}}]{screen\+Type }\end{DoxyParamCaption})}
+
+Funkcja rysuj¹ca splashart. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em Screen\+Type} & screen\+Type -\/ typ ekranu do wyrenderowania. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8cpp_ad90003f16ecb4419449aa1bdf827b7a0}\label{main_8cpp_ad90003f16ecb4419449aa1bdf827b7a0} 
+\index{main.cpp@{main.cpp}!gm\_drawSkybox@{gm\_drawSkybox}}
+\index{gm\_drawSkybox@{gm\_drawSkybox}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_drawSkybox()}{gm\_drawSkybox()}}
+{\footnotesize\ttfamily void gm\+\_\+draw\+Skybox (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Funkcja rysuj¹ca skybox. \Hypertarget{main_8cpp_a7ecafd727355b79004bbf872fe72910e}\label{main_8cpp_a7ecafd727355b79004bbf872fe72910e} 
+\index{main.cpp@{main.cpp}!gm\_drawSprite@{gm\_drawSprite}}
+\index{gm\_drawSprite@{gm\_drawSprite}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_drawSprite()}{gm\_drawSprite()}}
+{\footnotesize\ttfamily void gm\+\_\+draw\+Sprite (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Funkcja rysuj¹ca \doxylink{struct_sprite}{Sprite} i odpowiadaj¹ca za logikê ich poruszania siê. 
+
+\Hypertarget{main_8cpp_a10761c0982addc90d08e5da88e00dc64}\label{main_8cpp_a10761c0982addc90d08e5da88e00dc64} 
+\index{main.cpp@{main.cpp}!gm\_handleButtonDown@{gm\_handleButtonDown}}
+\index{gm\_handleButtonDown@{gm\_handleButtonDown}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_handleButtonDown()}{gm\_handleButtonDown()}}
+{\footnotesize\ttfamily void gm\+\_\+handle\+Button\+Down (\begin{DoxyParamCaption}\item[{unsigned char}]{key,  }\item[{int}]{x,  }\item[{int}]{y }\end{DoxyParamCaption})}
+
+Funkcja obs³uguj¹ca wciœniêcie przycisku. Przekazywana jako parametr do funkcji glut\+Keyboard\+Func(). \Hypertarget{main_8cpp_a6ba99a1eeb09529f39f0d4d93b0713ba}\label{main_8cpp_a6ba99a1eeb09529f39f0d4d93b0713ba} 
+\index{main.cpp@{main.cpp}!gm\_handleButtonUp@{gm\_handleButtonUp}}
+\index{gm\_handleButtonUp@{gm\_handleButtonUp}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_handleButtonUp()}{gm\_handleButtonUp()}}
+{\footnotesize\ttfamily void gm\+\_\+handle\+Button\+Up (\begin{DoxyParamCaption}\item[{unsigned char}]{key,  }\item[{int}]{x,  }\item[{int}]{y }\end{DoxyParamCaption})}
+
+Funkcja obs³uguj¹ca zwolnienie przycisku. Przekazywana jako parametr do funkcji glut\+Keyboard\+Up\+Func(). \Hypertarget{main_8cpp_a96b6ca0aec318fed43d9cea72935ab25}\label{main_8cpp_a96b6ca0aec318fed43d9cea72935ab25} 
+\index{main.cpp@{main.cpp}!gm\_handleClick@{gm\_handleClick}}
+\index{gm\_handleClick@{gm\_handleClick}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_handleClick()}{gm\_handleClick()}}
+{\footnotesize\ttfamily void gm\+\_\+handle\+Click (\begin{DoxyParamCaption}\item[{int}]{button,  }\item[{int}]{state,  }\item[{int}]{x,  }\item[{int}]{y }\end{DoxyParamCaption})}
+
+Funkcja obs³uguj¹ca wciœniêcie przycisku myszy. Przekazywana jako parametr do funkcji glut\+Mouse\+Func(). \Hypertarget{main_8cpp_a0fd34a4f5b74bae73d0552f3f11553e5}\label{main_8cpp_a0fd34a4f5b74bae73d0552f3f11553e5} 
+\index{main.cpp@{main.cpp}!gm\_handleClickSetState@{gm\_handleClickSetState}}
+\index{gm\_handleClickSetState@{gm\_handleClickSetState}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_handleClickSetState()}{gm\_handleClickSetState()}}
+{\footnotesize\ttfamily void gm\+\_\+handle\+Click\+Set\+State (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}}}]{state }\end{DoxyParamCaption})}
+
+
+
+Funkcja obs³uguj¹ca zmianê stanu gry z poziomu funkcji klikniêcia. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em Game\+State} & state -\/ nowa wartoœæ stanu. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8cpp_af9dec5c33de6c7c429939179ac78920e}\label{main_8cpp_af9dec5c33de6c7c429939179ac78920e} 
+\index{main.cpp@{main.cpp}!gm\_handleEndGame@{gm\_handleEndGame}}
+\index{gm\_handleEndGame@{gm\_handleEndGame}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_handleEndGame()}{gm\_handleEndGame()}}
+{\footnotesize\ttfamily void gm\+\_\+handle\+End\+Game (\begin{DoxyParamCaption}\item[{bool}]{git\+Gud = {\ttfamily false} }\end{DoxyParamCaption})}
+
+
+
+Funkcja do wyœwietlenia ekranu przegranej / wygranej. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em git\+Gud} & -\/ informacja o tym, czy przegrano. Domyœlnie false. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8cpp_a1071eb4d72f4c2f397742a23b070a3ac}\label{main_8cpp_a1071eb4d72f4c2f397742a23b070a3ac} 
+\index{main.cpp@{main.cpp}!gm\_init@{gm\_init}}
+\index{gm\_init@{gm\_init}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_init()}{gm\_init()}}
+{\footnotesize\ttfamily void gm\+\_\+init (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Funkcja inicjalizuj¹ca wymagane zmienne. \Hypertarget{main_8cpp_a5e522270d8294df40927321ae25c3235}\label{main_8cpp_a5e522270d8294df40927321ae25c3235} 
+\index{main.cpp@{main.cpp}!gm\_placeExit@{gm\_placeExit}}
+\index{gm\_placeExit@{gm\_placeExit}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_placeExit()}{gm\_placeExit()}}
+{\footnotesize\ttfamily void gm\+\_\+place\+Exit (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Funkcja ustawiaj¹ca pozycjê wyjœcia z labiryntu. Pobiera dane z pliku levels.\+json. Jeœli wartoœci exitX i exitY s¹ równe -\/1, szuka losowego wyjœcia. \Hypertarget{main_8cpp_a0956c936cb9281e26f90b656acc87f05}\label{main_8cpp_a0956c936cb9281e26f90b656acc87f05} 
+\index{main.cpp@{main.cpp}!gm\_placePlayer@{gm\_placePlayer}}
+\index{gm\_placePlayer@{gm\_placePlayer}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_placePlayer()}{gm\_placePlayer()}}
+{\footnotesize\ttfamily void gm\+\_\+place\+Player (\begin{DoxyParamCaption}\item[{int}]{posX,  }\item[{int}]{posY }\end{DoxyParamCaption})}
+
+Funkcja ustawiaj¹ca pozycjê gracza na siatce œwiata. Pobiera dane z pliku levels.\+json. Dodatkowo ustawia k¹t, dx i dy gracza. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em int} & posX -\/ pozycja startowa x w przedziale \mbox{[}0, szerokoœæ) \\
+\hline
+\mbox{\texttt{ in}}  & {\em int} & posY -\/ pozycja startowa y w przedziale \mbox{[}0, wysokoœæ) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8cpp_a0ad1ee2c569626274b332d33254a7ec6}\label{main_8cpp_a0ad1ee2c569626274b332d33254a7ec6} 
+\index{main.cpp@{main.cpp}!gm\_placeSprite@{gm\_placeSprite}}
+\index{gm\_placeSprite@{gm\_placeSprite}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_placeSprite()}{gm\_placeSprite()}}
+{\footnotesize\ttfamily void gm\+\_\+place\+Sprite (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}}}]{type,  }\item[{int}]{gridX,  }\item[{int}]{gridY }\end{DoxyParamCaption})}
+
+Funkcja ustawiaj¹ca \doxylink{struct_sprite}{Sprite} na danej pozycji w mapie. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em Sprite\+Type} & type -\/ \doxylink{struct_sprite}{Sprite} do postawienia. \\
+\hline
+\mbox{\texttt{ in}}  & {\em int} & gridX -\/ pozycja x, nale¿¹ca do \mbox{[}0, szerokoœæ). \\
+\hline
+\mbox{\texttt{ in}}  & {\em int} & gridY -\/ pozycja y, nale¿¹ca do \mbox{[}0, wysokoœæ). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8cpp_a577feace0c8bb6a01568ab5d6929a1dd}\label{main_8cpp_a577feace0c8bb6a01568ab5d6929a1dd} 
+\index{main.cpp@{main.cpp}!gm\_randomPlaceEntity@{gm\_randomPlaceEntity}}
+\index{gm\_randomPlaceEntity@{gm\_randomPlaceEntity}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_randomPlaceEntity()}{gm\_randomPlaceEntity()}}
+{\footnotesize\ttfamily void gm\+\_\+random\+Place\+Entity (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}}}]{type }\end{DoxyParamCaption})}
+
+Funkcja ustawiaj¹ca pozycjê \doxylink{struct_sprite}{Sprite} w losowym miejscu na mapie. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em Sprite\+Type} & type -\/ typ \doxylink{struct_sprite}{Sprite} do renderowania. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8cpp_aaa4e5ae4b3716bc2e534386879c8abaf}\label{main_8cpp_aaa4e5ae4b3716bc2e534386879c8abaf} 
+\index{main.cpp@{main.cpp}!gm\_setupLabirynth@{gm\_setupLabirynth}}
+\index{gm\_setupLabirynth@{gm\_setupLabirynth}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gm\_setupLabirynth()}{gm\_setupLabirynth()}}
+{\footnotesize\ttfamily void gm\+\_\+setup\+Labirynth (\begin{DoxyParamCaption}\item[{int}]{lv\+Num }\end{DoxyParamCaption})}
+
+Funkcja pobieraj¹ca dane o labiryncie do wygenerowania. Tutaj umieszcza siê dane odnoœnie przeciwników na planszy. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em int} & lv\+Num -\/ numer poziom indeksowany od 1 \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8cpp_a0ddf1224851353fc92bfbff6f499fa97}\label{main_8cpp_a0ddf1224851353fc92bfbff6f499fa97} 
+\index{main.cpp@{main.cpp}!main@{main}}
+\index{main@{main}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char \texorpdfstring{$\ast$}{*}}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{main_8cpp_a4f50e96f11c68d45dc109185efe011ad}\label{main_8cpp_a4f50e96f11c68d45dc109185efe011ad} 
+\index{main.cpp@{main.cpp}!fps@{fps}}
+\index{fps@{fps}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{fps}{fps}}
+{\footnotesize\ttfamily float fps = 0}
+
+\Hypertarget{main_8cpp_ac5b54fda187f8487bb464b1851b1af48}\label{main_8cpp_ac5b54fda187f8487bb464b1851b1af48} 
+\index{main.cpp@{main.cpp}!frame1@{frame1}}
+\index{frame1@{frame1}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{frame1}{frame1}}
+{\footnotesize\ttfamily float frame1 = 0}
+
+\Hypertarget{main_8cpp_a3655ce19f8a959dcb84b2bc8242c8b5a}\label{main_8cpp_a3655ce19f8a959dcb84b2bc8242c8b5a} 
+\index{main.cpp@{main.cpp}!frame2@{frame2}}
+\index{frame2@{frame2}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{frame2}{frame2}}
+{\footnotesize\ttfamily float frame2 = 0}
+
+\Hypertarget{main_8cpp_a4089233ede3ad3ba9618e76697aeda27}\label{main_8cpp_a4089233ede3ad3ba9618e76697aeda27} 
+\index{main.cpp@{main.cpp}!gameInfo@{gameInfo}}
+\index{gameInfo@{gameInfo}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{gameInfo}{gameInfo}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_game_info}{Game\+Info}} game\+Info}
+
+\Hypertarget{main_8cpp_a27a06ed7f9efe0fd0986e227c6735cb2}\label{main_8cpp_a27a06ed7f9efe0fd0986e227c6735cb2} 
+\index{main.cpp@{main.cpp}!keys@{keys}}
+\index{keys@{keys}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{keys}{keys}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_button_keys}{Button\+Keys}} keys}
+
+\Hypertarget{main_8cpp_af61d6983a9396a11078805087518af88}\label{main_8cpp_af61d6983a9396a11078805087518af88} 
+\index{main.cpp@{main.cpp}!player@{player}}
+\index{player@{player}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{player}{player}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_player}{Player}} player}
+
+\Hypertarget{main_8cpp_af6cf398a3f82b8e5ddc20dcd2873483e}\label{main_8cpp_af6cf398a3f82b8e5ddc20dcd2873483e} 
+\index{main.cpp@{main.cpp}!rayDepth@{rayDepth}}
+\index{rayDepth@{rayDepth}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{rayDepth}{rayDepth}}
+{\footnotesize\ttfamily int ray\+Depth\mbox{[}\mbox{\hyperlink{main_8cpp_ab421473d9dab67510c7518f0ed3b7510}{RAYS\+\_\+\+NUM}}\mbox{]} = \{ 0 \}}
+
+\Hypertarget{main_8cpp_ad595baaa852c5d39f4429a7e6b91c76c}\label{main_8cpp_ad595baaa852c5d39f4429a7e6b91c76c} 
+\index{main.cpp@{main.cpp}!settings@{settings}}
+\index{settings@{settings}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{settings}{settings}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_game_settings}{Game\+Settings}} settings}
+
+\Hypertarget{main_8cpp_ad83f3a1752116c2160a45fd4a96170a6}\label{main_8cpp_ad83f3a1752116c2160a45fd4a96170a6} 
+\index{main.cpp@{main.cpp}!sprites@{sprites}}
+\index{sprites@{sprites}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{sprites}{sprites}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{struct_sprite}{Sprite}}$>$\texorpdfstring{$\ast$}{*} sprites}
+
+\Hypertarget{main_8cpp_a25362b33bad9ff6222dc40646c411649}\label{main_8cpp_a25362b33bad9ff6222dc40646c411649} 
+\index{main.cpp@{main.cpp}!state@{state}}
+\index{state@{state}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{state}{state}}
+{\footnotesize\ttfamily \mbox{\hyperlink{main_8cpp_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}} state}
+

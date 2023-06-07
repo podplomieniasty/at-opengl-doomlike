@@ -1,0 +1,220 @@
+\doxysection{Sprite Struct Reference}
+\hypertarget{struct_sprite}{}\label{struct_sprite}\index{Sprite@{Sprite}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{struct_sprite_a2e5ead92de7305a03b11a0b952d460e1}{Sprite}} (\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}} \mbox{\hyperlink{struct_sprite_a405d7a576e6267362913d498dfbcfd30}{type}})
+\begin{DoxyCompactList}\small\item\em Domyœlny konstruktor struktury. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{struct_sprite_a54d2f0a96716b5f818f9e8ad58eaae0f}{hide}} ()
+\item 
+void \mbox{\hyperlink{struct_sprite_a567fc11091e0b6c1f4903a291ddf46ed}{handle\+On\+Player\+Touch}} ()
+\begin{DoxyCompactList}\small\item\em Funkcja wywo³ywana, kiedy gracz znajdzie siê w zasiêgu interakcji. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{struct_sprite_a405d7a576e6267362913d498dfbcfd30}{type}}
+\item 
+bool \mbox{\hyperlink{struct_sprite_aabf7d479c350a49c396c610179d61e3b}{active}} = true
+\item 
+int \mbox{\hyperlink{struct_sprite_a11c216e65cb051a90d008bd3a13202f4}{map}} = 0
+\item 
+int \mbox{\hyperlink{struct_sprite_ab36028dcefdd4bf024c52c8d9519a283}{x}}
+\item 
+int \mbox{\hyperlink{struct_sprite_a363e26017ee2aaed8636f7dab92af2cd}{y}}
+\item 
+int \mbox{\hyperlink{struct_sprite_a340d0839542214bbe60a9ea9f2198763}{z}}
+\item 
+int \mbox{\hyperlink{struct_sprite_ab6a02fd5c0c1e78ff9d4b49f0e30d619}{dx}}
+\item 
+int \mbox{\hyperlink{struct_sprite_a842a4349e53a03869a12357ebf27aaad}{dy}}
+\item 
+int \mbox{\hyperlink{struct_sprite_a8e5eae0ba00a77e6527f6a1374987efa}{scale}} = 32
+\item 
+int \mbox{\hyperlink{struct_sprite_a5647d157730b14115ef89af94f75e9ed}{hitbox}} = 30
+\item 
+int \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{struct_sprite_a37371a2f09f5f766cef1535c3302d404}{texture}}
+\item 
+bool \mbox{\hyperlink{struct_sprite_a42fd0ae97a070d675c33315630a5d2ce}{toggled}} = false
+\item 
+int \mbox{\hyperlink{struct_sprite_a88d9a6d8ee3545cac160c295e9e62a0a}{live\+Time}} = -\/1
+\item 
+int \mbox{\hyperlink{struct_sprite_ac62bcd806657fa9a5f62d07b62c704bc}{spawned\+At}} = glut\+Get(GLUT\+\_\+\+ELAPSED\+\_\+\+TIME)
+\item 
+float \mbox{\hyperlink{struct_sprite_a1e8cb023a490d0522340a88064b47377}{detection\+Range}}
+\item 
+float \mbox{\hyperlink{struct_sprite_a278ff0ee470214e523a6329253bf0558}{dist}}
+\item 
+float \mbox{\hyperlink{struct_sprite_a2a9fd0c3b579d562e05e4b9e04f62b78}{angle}}
+\item 
+float \mbox{\hyperlink{struct_sprite_a577d8aa2b63073ffdf66a8ac5b0d6e88}{velocity}}
+\item 
+float \mbox{\hyperlink{struct_sprite_a1a7114606047b4e76bf2a6f058494400}{step}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Jest to specjalna struktura przechowuj¹ca informacje o sprite\textquotesingle{}ach i ich w³aœciwoœciach. \begin{DoxySeeAlso}{See also}
+\doxylink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type()} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{struct_sprite_a2e5ead92de7305a03b11a0b952d460e1}\label{struct_sprite_a2e5ead92de7305a03b11a0b952d460e1} 
+\index{Sprite@{Sprite}!Sprite@{Sprite}}
+\index{Sprite@{Sprite}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{Sprite()}{Sprite()}}
+{\footnotesize\ttfamily Sprite\+::\+Sprite (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type}}}]{type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Domyœlny konstruktor struktury. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em Sprite\+Type} & type -\/ Typ danego \doxylink{struct_sprite}{Sprite}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See also}
+\doxylink{main_8cpp_ac6fa10729dffeb6a192492f13c25e31a}{Sprite\+Type()} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{struct_sprite_a567fc11091e0b6c1f4903a291ddf46ed}\label{struct_sprite_a567fc11091e0b6c1f4903a291ddf46ed} 
+\index{Sprite@{Sprite}!handleOnPlayerTouch@{handleOnPlayerTouch}}
+\index{handleOnPlayerTouch@{handleOnPlayerTouch}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{handleOnPlayerTouch()}{handleOnPlayerTouch()}}
+{\footnotesize\ttfamily void Sprite\+::handle\+On\+Player\+Touch (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Funkcja wywo³ywana, kiedy gracz znajdzie siê w zasiêgu interakcji. 
+
+\Hypertarget{struct_sprite_a54d2f0a96716b5f818f9e8ad58eaae0f}\label{struct_sprite_a54d2f0a96716b5f818f9e8ad58eaae0f} 
+\index{Sprite@{Sprite}!hide@{hide}}
+\index{hide@{hide}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{hide()}{hide()}}
+{\footnotesize\ttfamily void Sprite\+::hide (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{struct_sprite_aabf7d479c350a49c396c610179d61e3b}\label{struct_sprite_aabf7d479c350a49c396c610179d61e3b} 
+\index{Sprite@{Sprite}!active@{active}}
+\index{active@{active}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{active}{active}}
+{\footnotesize\ttfamily bool Sprite\+::active = true}
+
+\Hypertarget{struct_sprite_a2a9fd0c3b579d562e05e4b9e04f62b78}\label{struct_sprite_a2a9fd0c3b579d562e05e4b9e04f62b78} 
+\index{Sprite@{Sprite}!angle@{angle}}
+\index{angle@{angle}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{angle}{angle}}
+{\footnotesize\ttfamily float Sprite\+::angle}
+
+\Hypertarget{struct_sprite_a1e8cb023a490d0522340a88064b47377}\label{struct_sprite_a1e8cb023a490d0522340a88064b47377} 
+\index{Sprite@{Sprite}!detectionRange@{detectionRange}}
+\index{detectionRange@{detectionRange}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{detectionRange}{detectionRange}}
+{\footnotesize\ttfamily float Sprite\+::detection\+Range}
+
+\Hypertarget{struct_sprite_a278ff0ee470214e523a6329253bf0558}\label{struct_sprite_a278ff0ee470214e523a6329253bf0558} 
+\index{Sprite@{Sprite}!dist@{dist}}
+\index{dist@{dist}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{dist}{dist}}
+{\footnotesize\ttfamily float Sprite\+::dist}
+
+\Hypertarget{struct_sprite_ab6a02fd5c0c1e78ff9d4b49f0e30d619}\label{struct_sprite_ab6a02fd5c0c1e78ff9d4b49f0e30d619} 
+\index{Sprite@{Sprite}!dx@{dx}}
+\index{dx@{dx}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{dx}{dx}}
+{\footnotesize\ttfamily int Sprite\+::dx}
+
+\Hypertarget{struct_sprite_a842a4349e53a03869a12357ebf27aaad}\label{struct_sprite_a842a4349e53a03869a12357ebf27aaad} 
+\index{Sprite@{Sprite}!dy@{dy}}
+\index{dy@{dy}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{dy}{dy}}
+{\footnotesize\ttfamily int Sprite\+::dy}
+
+\Hypertarget{struct_sprite_a5647d157730b14115ef89af94f75e9ed}\label{struct_sprite_a5647d157730b14115ef89af94f75e9ed} 
+\index{Sprite@{Sprite}!hitbox@{hitbox}}
+\index{hitbox@{hitbox}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{hitbox}{hitbox}}
+{\footnotesize\ttfamily int Sprite\+::hitbox = 30}
+
+\Hypertarget{struct_sprite_a88d9a6d8ee3545cac160c295e9e62a0a}\label{struct_sprite_a88d9a6d8ee3545cac160c295e9e62a0a} 
+\index{Sprite@{Sprite}!liveTime@{liveTime}}
+\index{liveTime@{liveTime}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{liveTime}{liveTime}}
+{\footnotesize\ttfamily int Sprite\+::live\+Time = -\/1}
+
+\Hypertarget{struct_sprite_a11c216e65cb051a90d008bd3a13202f4}\label{struct_sprite_a11c216e65cb051a90d008bd3a13202f4} 
+\index{Sprite@{Sprite}!map@{map}}
+\index{map@{map}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{map}{map}}
+{\footnotesize\ttfamily int Sprite\+::map = 0}
+
+\Hypertarget{struct_sprite_a8e5eae0ba00a77e6527f6a1374987efa}\label{struct_sprite_a8e5eae0ba00a77e6527f6a1374987efa} 
+\index{Sprite@{Sprite}!scale@{scale}}
+\index{scale@{scale}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{scale}{scale}}
+{\footnotesize\ttfamily int Sprite\+::scale = 32}
+
+\Hypertarget{struct_sprite_ac62bcd806657fa9a5f62d07b62c704bc}\label{struct_sprite_ac62bcd806657fa9a5f62d07b62c704bc} 
+\index{Sprite@{Sprite}!spawnedAt@{spawnedAt}}
+\index{spawnedAt@{spawnedAt}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{spawnedAt}{spawnedAt}}
+{\footnotesize\ttfamily int Sprite\+::spawned\+At = glut\+Get(GLUT\+\_\+\+ELAPSED\+\_\+\+TIME)}
+
+\Hypertarget{struct_sprite_a1a7114606047b4e76bf2a6f058494400}\label{struct_sprite_a1a7114606047b4e76bf2a6f058494400} 
+\index{Sprite@{Sprite}!step@{step}}
+\index{step@{step}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{step}{step}}
+{\footnotesize\ttfamily float Sprite\+::step}
+
+\Hypertarget{struct_sprite_a37371a2f09f5f766cef1535c3302d404}\label{struct_sprite_a37371a2f09f5f766cef1535c3302d404} 
+\index{Sprite@{Sprite}!texture@{texture}}
+\index{texture@{texture}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{texture}{texture}}
+{\footnotesize\ttfamily int\texorpdfstring{$\ast$}{*} Sprite\+::texture}
+
+\Hypertarget{struct_sprite_a42fd0ae97a070d675c33315630a5d2ce}\label{struct_sprite_a42fd0ae97a070d675c33315630a5d2ce} 
+\index{Sprite@{Sprite}!toggled@{toggled}}
+\index{toggled@{toggled}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{toggled}{toggled}}
+{\footnotesize\ttfamily bool Sprite\+::toggled = false}
+
+\Hypertarget{struct_sprite_a405d7a576e6267362913d498dfbcfd30}\label{struct_sprite_a405d7a576e6267362913d498dfbcfd30} 
+\index{Sprite@{Sprite}!type@{type}}
+\index{type@{type}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{type}{type}}
+{\footnotesize\ttfamily int Sprite\+::type}
+
+\Hypertarget{struct_sprite_a577d8aa2b63073ffdf66a8ac5b0d6e88}\label{struct_sprite_a577d8aa2b63073ffdf66a8ac5b0d6e88} 
+\index{Sprite@{Sprite}!velocity@{velocity}}
+\index{velocity@{velocity}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{velocity}{velocity}}
+{\footnotesize\ttfamily float Sprite\+::velocity}
+
+\Hypertarget{struct_sprite_ab36028dcefdd4bf024c52c8d9519a283}\label{struct_sprite_ab36028dcefdd4bf024c52c8d9519a283} 
+\index{Sprite@{Sprite}!x@{x}}
+\index{x@{x}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{x}{x}}
+{\footnotesize\ttfamily int Sprite\+::x}
+
+\Hypertarget{struct_sprite_a363e26017ee2aaed8636f7dab92af2cd}\label{struct_sprite_a363e26017ee2aaed8636f7dab92af2cd} 
+\index{Sprite@{Sprite}!y@{y}}
+\index{y@{y}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{y}{y}}
+{\footnotesize\ttfamily int Sprite\+::y}
+
+\Hypertarget{struct_sprite_a340d0839542214bbe60a9ea9f2198763}\label{struct_sprite_a340d0839542214bbe60a9ea9f2198763} 
+\index{Sprite@{Sprite}!z@{z}}
+\index{z@{z}!Sprite@{Sprite}}
+\doxysubsubsection{\texorpdfstring{z}{z}}
+{\footnotesize\ttfamily int Sprite\+::z}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{main_8cpp}{main.\+cpp}}\end{DoxyCompactItemize}
