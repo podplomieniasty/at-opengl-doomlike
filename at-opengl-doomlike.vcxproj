@@ -72,11 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)\dependencies\json\;$(SolutionDir)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\dependencies\freeglut\include\;$(SolutionDir)\dependencies\glad\include\;$(SolutionDir)\dependencies\GLFW\include\;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)\dependencies\freeglut\lib\$(Platform);$(SolutionDir)\dependencies\GLFW\lib\;</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)\dependencies\freeglut\include\GL\;$(Platform);$(SolutionDir)\dependencies\GLFW\lib\;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)\dependencies\json\;$(SolutionDir)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\dependencies\freeglut\include\;$(SolutionDir)\dependencies\glad\include\;$(SolutionDir)\dependencies\GLFW\include\;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)\dependencies\freeglut\lib\$(Platform);$(SolutionDir)\dependencies\GLFW\lib\;</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)\dependencies\freeglut\include\GL\;$(Platform);$(SolutionDir)\dependencies\GLFW\lib\;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -163,6 +163,7 @@
     <None Include=".gitignore" />
     <None Include="dependencies\freeglut\bin\Win32\freeglut.dll" />
     <None Include="dependencies\freeglut\bin\x64\freeglut.dll" />
+    <None Include="freeglut.dll" />
     <None Include="levels\levels.json" />
     <None Include="README.md" />
     <None Include="splasharts\Cover.ppm" />
@@ -185,6 +186,7 @@
     <None Include="textures\Walls.ppm" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="dependencies\freeglut\include\GL\freeglut.lib" />
     <Library Include="dependencies\freeglut\lib\Win32\freeglut.lib" />
     <Library Include="dependencies\freeglut\lib\x64\freeglut.lib" />
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />
