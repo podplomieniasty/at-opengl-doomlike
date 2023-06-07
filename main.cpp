@@ -9,9 +9,12 @@
 #include <gl/freeglut.h>
 #include <math.h>
 #include <vector>
+#include <algorithm>
 
 #include <Windows.h>
 #include <mmsystem.h>
+
+#include "labirynthparser.h"
 
 // ---- Tekstury ----
 
@@ -24,34 +27,31 @@
 #include "textures/Chaser.ppm"
 #include "textures/Sprites.ppm"
 
-
 // ---- Splasharty ----
 
+#include "splasharts/Splashart_menu_title.ppm"
+#include "splasharts/Splashart_menu_levels.ppm"
 #include "splasharts/Splashart_test.ppm"
+#include "splasharts/Splashart_win.ppm"
+#include "splasharts/Splashart_lose.ppm"
 
 // ---- Sta³e ----
 
-#define PI			3.1415926535
+#define PI			3.1415926535	// wartoœæ PI
+#define DEG			0.0174533		// stopieñ w radianach
 
-#define P2			PI/2			
-#define P3			3*PI/2
-#define DEG			0.0174533	// stopieñ w radianach
-
-#define WIDTH		1024
-#define HEIGHT		768
+#define WIDTH		1024			// szerokoœæ ekranu
+#define HEIGHT		768				// wysokoœæ ekranu
 #define TITLE		"Raycasting - Bialas, Burzec i Kijowski"
 
-#define MAP_HEIGHT	320
-
-#define mapX		10	// szerokoœæ mapy
-#define mapY		10	// wysokoœæ mapy
+#define MAP_HEIGHT	320	
 #define mapS		64  // rozmiar kostki mapy
 
-#define RAYS_NUM 144
+#define RAYS_NUM	240	// iloœæ promieni rysuj¹cych
 
+void gm_handleEndGame(bool gitGud = false);
 
-
-// ---- Dodatkowe funkcje ----
+// ---- Funkcje obliczaj¹ce ----
 
 float degToRad(float a) { return a * PI / 180.0; };
 float fixAngle(float a) { if (a > 359) a -= 360; if (a < 0) a += 360; return a; };
@@ -63,25 +63,30 @@ float distance(float ax, float ay, float bx, float by, float angle) { return cos
 
 enum SpriteType {
 
-	SPRITE_STATIC = 1,
-	SPRITE_KEY,
-	SPRITE_ENEMY,
+	ENEMY = 1,
+	CHASER,
 	LEVER,
 	BULLET,
 	COIN,
-	CHASER,
+	CRATE,
+	BARREL,
+	BARREL_BOOM,
+	ROCK,
+	STONE,
+	CHAIR,
+	EXIT
 };
-
 enum ScreenType {
 	SCR_TITLE = 1,
+	SCR_MENU,
 	SCR_GAME,
 	SCR_LV_PASS,
 	SCR_LV_FAIL
 };
-
 enum GameState {
-	GM_BEGIN = 0,
-	GM_TITLE,
+	GM_SETUP = 0,
+	GM_MENU_TITLE,
+	GM_MENU_LEVELS,
 	GM_GAME,
 	GM_WIN,
 	GM_LOST,
@@ -94,35 +99,35 @@ enum GameState {
 
 typedef struct {
 
-	int w, a, s, d;// klawisze ze stanami on/off
+	int w, a, s, d, tab;// klawisze ze stanami on/off
 } ButtonKeys;
-
 typedef struct GameInfo {
 
-	int score = 0;
-	bool isExitUnlocked = false;
-	bool gameOver = false;
+	int score				= 0;
+	bool isExitUnlocked		= false;
+	bool gameOver			= false;
+	bool ready				= false;
 	ScreenType activeScreen = SCR_TITLE;
-	GameState state = GM_TITLE;
-	int timer = 0;
-	bool canClick = false;
+	GameState state			= GM_MENU_TITLE;
+	int timer				= 0;
+	bool canClick			= false;
 
 }; GameInfo gameInfo;			// stany gry
-
 typedef struct Sprite {
 
-	int type;				// statyczny, przeciwnik, pickup -- przerobic na enum
-	bool active	=	true;	// czy jest aktywny
-	int map		=	0;		// której tekstury u¿yæ
-	int x, y, z;			// pozycja
+	int type;							// statyczny, przeciwnik, pickup -- przerobic na enum
+	bool active				=	true;	// czy jest aktywny
+	int map					=	0;		// której tekstury u¿yæ
+	int x, y, z;						// pozycja
 	int dx, dy;
-	int scale	=	32;		// skala
-	int hitbox	=	30;
+	int scale				=	32;		// skala
+	int hitbox				=	30;
 	int* texture;
-	bool toggled = false;
-	int liveTime = -1;		// sekundy
-	int spawnedAt = GLUT_ELAPSED_TIME;
+	bool toggled			= false;
+	int liveTime			= -1;		// sekundy
+	int spawnedAt			= glutGet(GLUT_ELAPSED_TIME);
 	float detectionRange;
+	float dist;
 
 	float angle;
 	float velocity;
@@ -131,11 +136,11 @@ typedef struct Sprite {
 	Sprite(SpriteType type) {
 		this->type = type;
 		switch (type) {
-			case SPRITE_STATIC:
+			case ENEMY:
 				texture = Amogus_01;
 				z = 30;
 				detectionRange = 120.0;
-				velocity = 0.1;
+				velocity = 1;
 				step = 1;
 				break;
 			case COIN:
@@ -156,6 +161,45 @@ typedef struct Sprite {
 				hitbox = 30;
 				map = 2;
 				break;
+			case CRATE:
+				texture = Sprites;
+				z = 40;
+				map = 4;
+				scale = 64;
+				hitbox = 50;
+				break;
+			case BARREL:
+				texture = Sprites;
+				z = 40;
+				map = 8;
+				scale = 48;
+				hitbox = 30;
+				break;
+			case EXIT:
+				texture = Sprites;
+				z = 15;
+				hitbox = 50;
+				map = 10;
+				active = false;
+				break;
+			case ROCK:
+				texture = Sprites;
+				z = 40;
+				map = 7;
+				scale = 48;
+				break;
+			case STONE:
+				texture = Sprites;
+				z = 40;
+				map = 6;
+				scale = 48;
+				break;
+			case CHAIR:
+				texture = Sprites;
+				z = 40;
+				map = 5;
+				scale = 40;
+				break;
 		}
 	}
 	void hide() {
@@ -164,11 +208,12 @@ typedef struct Sprite {
 	void handleOnPlayerTouch() {
 		switch (type) {
 
-			case SPRITE_STATIC:
+			case ENEMY:
 				if (!toggled) {
 					toggled = true;
 					gameInfo.gameOver = true;
 					gameInfo.canClick = false;
+					gm_handleEndGame(true);
 					PlaySound(L"audio/loss.wav", NULL, SND_ASYNC | SND_FILENAME);
 
 				}
@@ -189,114 +234,37 @@ typedef struct Sprite {
 					toggled = true;
 				}
 				break;
-			
-
+			case EXIT:
+				if (active) {
+					gm_handleEndGame(false);
+				}
 		}		
 	}
 };
-
 typedef struct {
 
 	float	x,		// pozycja X gracza
 			y,		// pozycja Y gracza
-			dx,	// delta X
-			dy,	// delta Y
-			angle;		// k¹t po³o¿enia gracza
+			dx,		// delta X
+			dy,		// delta Y
+			angle;	// k¹t po³o¿enia gracza
 } Player;
 
 
 
 // ---- Zmienne globalne ----
 
-ButtonKeys keys;			// uk³ad stanów klawiszy gracza
-Player player;				// gracz
-int rayDepth[RAYS_NUM];		// g³êbia ka¿dego promienia
-float frame1, frame2, fps;	// klatki wykorzystane do renderowania
-GameState state;
-
-std::vector<Sprite> sprites[2];
-
-int map_walls[] = {
-
-	1,2,3,2,1,3,1,2,1,1,
-	1,0,0,0,0,0,0,0,0,3,
-	1,0,0,0,0,0,0,0,0,2,
-	1,0,0,0,3,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,2,
-	1,0,0,0,3,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,2,
-	1,0,0,0,0,0,0,0,0,1,
-	1,1,1,1,1,1,1,1,1,1,
-};	// bloki œcian mapy
-
-int map_floor[] = {
-
-	1,1,1,1,1,1,1,1,1,1,
-	1,1,2,3,4,3,2,1,2,1,
-	1,1,0,0,0,0,0,0,0,1,
-	1,1,1,1,1,1,1,1,1,1,
-	1,1,1,1,1,1,1,1,1,1,
-	1,1,1,1,1,1,1,1,1,1,
-	1,1,1,1,1,1,1,1,1,1,
-	1,1,1,1,1,1,1,1,1,1,
-	1,1,1,1,1,1,1,1,1,1,
-	1,1,1,1,1,1,1,1,1,1,
-
-};	// pod³oga
-
-int map_ceiling[] = {
-
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-};	// sufit
+ButtonKeys			keys;			// uk³ad stanów klawiszy gracza
+Player				player;				// gracz
+int					rayDepth[RAYS_NUM] = { 0 };		// g³êbia ka¿dego promienia
+float				frame1 = 0, frame2 = 0, fps = 0;	// klatki wykorzystane do renderowania
+GameState			state;
+GameSettings		settings;
+std::vector<Sprite>* sprites;
 
 
 
-// ---- GRACZ ----
-
-void gm_handleButtonDown(unsigned char key, int x, int y) {
-
-	if (key == 'a') keys.a = 1;
-	if (key == 'd') keys.d = 1;
-	if (key == 'w') keys.w = 1;
-	if (key == 's') keys.s = 1;
-	glutPostRedisplay();
-}
-
-void gm_handleButtonUp(unsigned char key, int x, int y) {
-
-	if (key == 'a') keys.a = 0;
-	if (key == 'd') keys.d = 0;
-	if (key == 'w') keys.w = 0;
-	if (key == 's') keys.s = 0;
-	glutPostRedisplay();
-}
-
-void gm_handleClick(int button, int state, int x, int y) {
-
-	if (gameInfo.canClick == false) return;
-	std::cout << gameInfo.canClick;
-	if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
-		PlaySound(L"audio/shoot.wav", NULL, SND_ASYNC | SND_FILENAME);
-		Sprite bullet(BULLET);
-		bullet.velocity = 0.5;
-		bullet.angle = player.angle;
-		bullet.liveTime = 2 * 1000; // 2 sekundy
-		bullet.x = player.x;
-		bullet.y = player.y;
-		bullet.spawnedAt = glutGet(GLUT_ELAPSED_TIME);
-		sprites->push_back(bullet);
-	}
-}
+// ---- Funkcje rysuj¹ce ----
 
 void gm_drawSprite() {
 
@@ -304,7 +272,10 @@ void gm_drawSprite() {
 
 	for (int s = 0; s < sprites->size(); s++) {
 
-		// touchie touchie
+		// sortowanie
+		sprites->at(s).dist = distance(player.x, player.y, sprites->at(s).x, sprites->at(s).y, player.angle);
+
+		// sprawdzenie czy dotknê³o siê spritea
 		if (player.x < sprites->at(s).x + sprites->at(s).hitbox &&
 			player.x > sprites->at(s).x - sprites->at(s).hitbox &&
 			player.y < sprites->at(s).y + sprites->at(s).hitbox &&
@@ -313,6 +284,16 @@ void gm_drawSprite() {
 			sprites->at(s).handleOnPlayerTouch();
 		}
 
+		// sprawdzenie czy mo¿na odblokowaæ wyjœcie
+		if (sprites->at(s).type == EXIT) {
+
+			if (gameInfo.isExitUnlocked && sprites->at(s).active == false) {
+				sprites->at(s).active = true;
+			}
+
+		}
+
+		// logika dla pocisków
 		if (sprites->at(s).type == BULLET) {
 
 			if (glutGet(GLUT_ELAPSED_TIME) - sprites->at(s).spawnedAt >= sprites->at(s).liveTime) {
@@ -321,17 +302,33 @@ void gm_drawSprite() {
 			}
 
 			for (int e = 0; e < sprites->size(); e++) {
-				if (sprites->at(e).type == SPRITE_STATIC) {
+				if (sprites->at(e).type == ENEMY) {
 
 					if (sprites->at(s).x < sprites->at(e).x + sprites->at(e).hitbox &&
 						sprites->at(s).x > sprites->at(e).x - sprites->at(e).hitbox &&
 						sprites->at(s).y < sprites->at(e).y + sprites->at(e).hitbox &&
 						sprites->at(s).y > sprites->at(e).y - sprites->at(e).hitbox) {
 
-						int indexOfEnemy = e < s ? e : e + 1;
+						sprites->erase(sprites->begin() + e);
+						e--;
+						return;
+					}
+				}
+				if (sprites->at(e).type == CRATE || sprites->at(e).type == BARREL) {
+					if (sprites->at(s).x < sprites->at(e).x + sprites->at(e).hitbox &&
+						sprites->at(s).x > sprites->at(e).x - sprites->at(e).hitbox &&
+						sprites->at(s).y < sprites->at(e).y + sprites->at(e).hitbox &&
+						sprites->at(s).y > sprites->at(e).y - sprites->at(e).hitbox) {
 
-						sprites->erase(sprites->begin() + s);
-						sprites->erase(sprites->begin() + indexOfEnemy);
+						Sprite c(COIN);
+						c.x = sprites->at(e).x;
+						c.y = sprites->at(e).y;
+						sprites->push_back(c);
+
+						sprites->erase(sprites->begin() + e);
+						e--;
+						PlaySound(L"audio/wood_break.wav", NULL, SND_ASYNC | SND_FILENAME);
+
 						return;
 					}
 				}
@@ -346,24 +343,42 @@ void gm_drawSprite() {
 
 		}
 
-		//if (sprites->at(s).type == SPRITE_STATIC && gameInfo.state == GM_GAME) {
+		if (sprites->at(s).type == ENEMY && gameInfo.state == GM_GAME) {
 
+			if (player.x < sprites->at(s).x + sprites->at(s).detectionRange &&
+				player.x > sprites->at(s).x - sprites->at(s).detectionRange &&
+				player.y < sprites->at(s).y + sprites->at(s).detectionRange &&
+				player.y > sprites->at(s).y - sprites->at(s).detectionRange) {
 
-		//	// w zasiegu wzroku
-		//	if (player.x < sprites->at(s).x + sprites->at(s).detectionRange &&
-		//		player.x > sprites->at(s).x - sprites->at(s).detectionRange &&
-		//		player.y < sprites->at(s).y + sprites->at(s).detectionRange &&
-		//		player.y > sprites->at(s).y - sprites->at(s).detectionRange) {
+				float step = sprites->at(s).step;
 
-		//		float step = sprites->at(s).step * sprites->at(s).velocity * fps;
+				int hbx = (int)sprites->at(s).x >> 6; // pozycja w siatce mapy
+				int hby = (int)sprites->at(s).y >> 6;
 
-		//		if (player.x < sprites->at(s).x) sprites->at(s).x -= step;
-		//		if (player.x > sprites->at(s).x) sprites->at(s).x += step;
-		//		if (player.y < sprites->at(s).y) sprites->at(s).x -= step;
-		//		if (player.y > sprites->at(s).y) sprites->at(s).x += step;
-		//	}
+				int offset = sprites->at(s).hitbox;
 
-		//}
+				int hbx_add = ((int)sprites->at(s).x + offset) >> 6;
+				int hbx_sub = ((int)sprites->at(s).x - offset) >> 6;
+
+				int hby_add = ((int)sprites->at(s).y + offset) >> 6;
+				int hby_sub = ((int)sprites->at(s).y - offset) >> 6;
+
+				// kolizje dla sprite i poruszanie siê
+				if (player.x < sprites->at(s).x && settings.walls[hby * settings.width + hbx_sub] == 0) {
+					sprites->at(s).x -= step;
+				}
+				if (player.x > sprites->at(s).x && settings.walls[hby * settings.width + hbx_add] == 0) {
+					sprites->at(s).x += step; 
+				}
+				if (player.y < sprites->at(s).y && settings.walls[hby_sub * settings.width + hbx] == 0) {
+					sprites->at(s).y -= step;
+				}
+				if (player.y > sprites->at(s).y && settings.walls[hby_add * settings.width + hbx] == 0) {
+					sprites->at(s).y += step;
+				}
+			}
+
+		}
 
 		float spriteX = sprites->at(s).x - player.x;	// odleg³oœæ od gracza
 		float spriteY = sprites->at(s).y - player.y;
@@ -398,10 +413,10 @@ void gm_drawSprite() {
 			for (y = 0; y < scale; y++) {
 				if (sprites->at(s).active == 1 && x > 0 && x < 120 && b < rayDepth[x]) {
 
-					int pixel	= ((int)textureY * 32 + (int)textureX) * 3 + (sprites->at(s).map * 32 * 32 * 3);
-					int red		= sprites->at(s).texture[pixel + 0];
-					int green	= sprites->at(s).texture[pixel + 1];
-					int blue	= sprites->at(s).texture[pixel + 2];
+					int pixel = ((int)textureY * 32 + (int)textureX) * 3 + (sprites->at(s).map * 32 * 32 * 3);
+					int red = sprites->at(s).texture[pixel + 0];
+					int green = sprites->at(s).texture[pixel + 1];
+					int blue = sprites->at(s).texture[pixel + 2];
 					if (!(red == 255 && green == 0 && blue == 255)) {
 						glPointSize(8);
 						glColor3ub(red, green, blue);
@@ -416,14 +431,15 @@ void gm_drawSprite() {
 			textureX += textureXStep;
 		}
 	}
+	for (int s = sprites->size() - 1; s >= 0; s--) {
+		if (sprites->at(s).active == false && sprites->at(s).type != EXIT) sprites->erase(sprites->begin() + s);
+	}
+	std::sort(sprites->begin(), sprites->end(), [](const Sprite& a, Sprite& b) {return a.dist > b.dist; });
 }
-
-// ---- Mapa 2D ----
-
 void gm_drawMapIn2D() {
 
 	// funkcja rysuj¹ca mapê w formacie 2D.
-	/* 
+	/*
 		x,  y	->	po³o¿enie w uk³adzie mapy (x,y)
 		xo, yo	->	offset x, y
 
@@ -432,34 +448,35 @@ void gm_drawMapIn2D() {
 
 	int x, y, xo, yo;
 
-	for (y = 0; y < mapY; y++) {
+	for (y = 0; y < settings.height; y++) {
 
-		for (x = 0; x < mapX; x++) {
+		for (x = 0; x < settings.width; x++) {
 
-			if (map_walls[y * mapX + x] == 1) {
+			if (settings.walls[y * settings.width + x] != 0) {
 
 				// œciany oznaczone kolorem czarnym
-				glColor3f(0, 0, 0);	
+				glColor3f(0, 0, 0);
 			}
-			else if (map_walls[y * mapX + x] == 0) {
+			else if (settings.walls[y * settings.width + x] == 0) {
 
 				// puste pola oznaczone kolorem bia³ym
 				glColor3f(1, 1, 1);
 			}
 
-			xo = x * mapS;
-			yo = y * mapS;
+			xo = x * mapS / 2;
+			yo = y * mapS / 2;
+
+
 
 			glBegin(GL_QUADS);
 			glVertex2i(xo + 1, yo + 1);
 			glVertex2i(xo + 1, yo + mapS - 1);
-			glVertex2i(xo + mapS - 1, yo + mapS - 1 );
+			glVertex2i(xo + mapS - 1, yo + mapS - 1);
 			glVertex2i(xo + mapS - 1, yo + 1);
 			glEnd();
 		}
 	}
 }
-
 void gm_drawPlayer() {
 
 	// rysuje znacznik gracza na
@@ -468,27 +485,21 @@ void gm_drawPlayer() {
 	glColor3f(1, 0, 0);
 	glPointSize(8);
 	glBegin(GL_POINTS);
-	glVertex2i(player.x, player.y);
+	glVertex2i(player.x / 2, player.y / 2);
 	glEnd();
 
 	glLineWidth(3);
 	glBegin(GL_LINES);
-	glVertex2i(player.x, player.y);
-	glVertex2i(player.x + player.dx * 20, player.y + player.dy * 20);
+	glVertex2i(player.x / 2, player.y / 2);
+	glVertex2i(player.x / 2 + player.dx * 20, player.y / 2 + player.dy * 20);
 	glEnd();
 }
-
-float gm_distance(float ax, float ay, float bx, float by, float ang) {
-
-	return sqrt((bx - ax)*(bx - ax) + (by-ay)*(by-ay));
-}
-
 void gm_castRays3D() {
 
-	
+
 	/*
 		ray		->	aktualny promieñ
-		mpX		->	pozycja X promienia na mapie 
+		mpX		->	pozycja X promienia na mapie
 		mpY		->	pozycja Y promienia na mapie
 		mpP		->	pozycja w tablicy mapy
 		dof		->	depth-of-field, w celu okreœlenia co renderowaæ a co nie
@@ -524,53 +535,54 @@ void gm_castRays3D() {
 
 		//--- LINIE PIONOWE --- 
 
-		dof = 0; 
-		side = 0; 
+		dof = 0;
+		side = 0;
 		disV = 100000;	// bardzo du¿a defaultowa odleg³oœæ
 
 		float Tan = tan(degToRad(rayA));
 
 		if (cos(degToRad(rayA)) > 0.001) {			// sprawdŸ lewo
 
-			rayX = (((int)player.x >> 6) << 6) + 64;      
-			rayY = (player.x - rayX) * Tan + player.y; 
-			xOff = 64; 
-			yOff = -xOff * Tan; 
+			rayX = (((int)player.x >> 6) << 6) + 64;
+			rayY = (player.x - rayX) * Tan + player.y;
+			xOff = 64;
+			yOff = -xOff * Tan;
 		}
 
 		else if (cos(degToRad(rayA)) < -0.001) {		// sprawdŸ prawo
-			rayX = (((int)player.x >> 6) << 6) - 0.0001; 
-			rayY = (player.x - rayX) * Tan + player.y; 
-			xOff = -64; 
-			yOff = -xOff * Tan; }
-
-		// równoleg³e do pionu
-		else { 
-			rayX = player.x; 
-			rayY = player.y; 
-			dof = mapY; 
+			rayX = (((int)player.x >> 6) << 6) - 0.0001;
+			rayY = (player.x - rayX) * Tan + player.y;
+			xOff = -64;
+			yOff = -xOff * Tan;
 		}
 
-		while (dof < mapY)
+		// równoleg³e do pionu
+		else {
+			rayX = player.x;
+			rayY = player.y;
+			dof = settings.height;
+		}
+
+		while (dof < settings.height)
 		{
-			mpX = (int)(rayX) >> 6; 
-			mpY = (int)(rayY) >> 6; 
-			mpP = mpY * mapX + mpX;
+			mpX = (int)(rayX) >> 6;
+			mpY = (int)(rayY) >> 6;
+			mpP = mpY * settings.width + mpX;
 
 			// sprawdzenie, czy nachodzimy na œcianê
-			if (mpP > 0 && mpP < mapX * mapY && map_walls[mpP] > 0) {
-				vmt = map_walls[mpP] - 1;
-				dof = mapX; 
+			if (mpP > 0 && mpP < settings.width * settings.height && settings.walls[mpP] > 0) {
+				vmt = settings.walls[mpP] - 1;
+				dof = settings.height;
 				disV = cos(degToRad(rayA)) * (rayX - player.x) - sin(degToRad(rayA)) * (rayY - player.y);
-			}         
+			}
 			else {
-				rayX += xOff; 
-				rayY += yOff; 
-				dof += 1; 
+				rayX += xOff;
+				rayY += yOff;
+				dof += 1;
 			}
 		}
 
-		vx = rayX; 
+		vx = rayX;
 		vy = rayY;
 
 		//--- POZIOME LINIE ---
@@ -579,41 +591,41 @@ void gm_castRays3D() {
 		Tan = 1.0 / Tan;
 
 		if (sin(degToRad(rayA)) > 0.001) { 			// sprawdzenie góra
-			rayY = (((int)player.y >> 6) << 6) - 0.0001; 
-			rayX = (player.y - rayY) * Tan + player.x; 
-			yOff = -64; 
-			xOff = -yOff * Tan; 
+			rayY = (((int)player.y >> 6) << 6) - 0.0001;
+			rayX = (player.y - rayY) * Tan + player.x;
+			yOff = -64;
+			xOff = -yOff * Tan;
 		}
 
 		else if (sin(degToRad(rayA)) < -0.001) { 		// sprawdzenie dó³
-			rayY = (((int)player.y >> 6) << 6) + 64;      
-			rayX = (player.y - rayY) * Tan + player.x; 
-			yOff = 64; 
-			xOff = -yOff * Tan; 
+			rayY = (((int)player.y >> 6) << 6) + 64;
+			rayX = (player.y - rayY) * Tan + player.x;
+			yOff = 64;
+			xOff = -yOff * Tan;
 		}
 
 		// równoleg³e do poziomu
-		else { 
-			rayX = player.x; 
-			rayY = player.y; 
-			dof = mapX; 
-		} 
+		else {
+			rayX = player.x;
+			rayY = player.y;
+			dof = settings.width;
+		}
 
-		while (dof < mapX)
+		while (dof < settings.width)
 		{
-			mpX = (int)(rayX) >> 6; 
-			mpY = (int)(rayY) >> 6; 
-			mpP = mpY * mapX + mpX;
-			if (mpP > 0 && mpP < mapX * mapY && map_walls[mpP] > 0) {
-				hmt = map_walls[mpP] - 1;
-				dof = mapX; 
+			mpX = (int)(rayX) >> 6;
+			mpY = (int)(rayY) >> 6;
+			mpP = mpY * settings.width + mpX;
+			if (mpP > 0 && mpP < settings.width * settings.height && settings.walls[mpP] > 0) {
+				hmt = settings.walls[mpP] - 1;
+				dof = settings.width;
 				disH = cos(degToRad(rayA)) * (rayX - player.x) - sin(degToRad(rayA)) * (rayY - player.y);
-			}        
-			else { 
-				rayX += xOff; 
-				rayY += yOff; 
-				dof += 1; 
-			} 
+			}
+			else {
+				rayX += xOff;
+				rayY += yOff;
+				dof += 1;
+			}
 		}
 
 		float shade = 1;	// do cieniowania niektórych œcian
@@ -621,25 +633,25 @@ void gm_castRays3D() {
 		if (disV < disH) {
 			hmt = vmt;
 			shade = 0.5;
-			rayX = vx; 
-			rayY = vy; 
-			disH = disV; 
+			rayX = vx;
+			rayY = vy;
+			disH = disV;
 			glColor3f(0, 0.6, 0);
 		}
 
-		int ca = fixAngle(player.angle - rayA); 
+		int ca = fixAngle(player.angle - rayA);
 		disH = disH * cos(degToRad(ca));		// finalny dystans
 		int lineH = (mapS * HEIGHT) / (disH);	// wysokoœæ rysowanej linii
 
-		float ty_step = 32.0 / (float)lineH;	
+		float ty_step = 32.0 / (float)lineH;
 		float ty_off = 0;
 
 		if (lineH > HEIGHT) {
-			ty_off = (lineH - HEIGHT)/2.0;
+			ty_off = (lineH - HEIGHT) / 2.0;
 			lineH = HEIGHT;
 
 		}
-		int lineOff = HEIGHT/2 - (lineH >> 1);
+		int lineOff = HEIGHT / 2 - (lineH >> 1);
 
 
 		rayDepth[ray] = disH; // zapisanie g³êbi promienia
@@ -656,11 +668,13 @@ void gm_castRays3D() {
 			if (rayA > 90 && rayA < 180) textureX = 31 - textureX;
 		}
 
+
 		for (int y = 0; y < lineH; y++) {
-			int pixel	=	((int)textureY * 32 + (int)textureX) * 3 + (hmt * 32 * 32);
-			int red		=	Walls[pixel + 0] * shade;
-			int green	=	Walls[pixel + 1] * shade;
-			int blue	=	Walls[pixel + 2] * shade;
+			int pixel = ((int)textureY * 32 + (int)textureX) * 3 + (hmt * 32 * 32 * 3);
+			int red = Walls[pixel + 0] * shade;
+			int green = Walls[pixel + 1] * shade;
+			int blue = Walls[pixel + 2] * shade;
+
 			glPointSize(8);
 			glColor3ub(red, green, blue);
 			glBegin(GL_POINTS);
@@ -677,14 +691,14 @@ void gm_castRays3D() {
 			float deg = degToRad(rayA);
 			float raFix = cos(degToRad(fixAngle(player.angle - rayA)));
 
-			float magicNum = 158 * 32 * 2.5;
+			int magicNum = 190 * 32 * 2;
 
 			textureX = player.x / 2 + cos(deg) * magicNum / dy / raFix;
 			textureY = player.y / 2 - sin(deg) * magicNum / dy / raFix;
 
-			int mp = map_floor[(int)(textureY / 32.0) * mapX + (int)(textureX / 32.0)] * 32 * 32;
+			int mp = settings.floor[(int)(textureY / 32.0) * settings.width + (int)(textureX / 32.0)] * 32 * 32;
 
-			int pixel = (((int)(textureY) & 31)*32 + ((int)textureX & 31)) * 3 + mp * 3;
+			int pixel = (((int)(textureY) & 31) * 32 + ((int)textureX & 31)) * 3 + mp * 3;
 			int red = Floor[pixel + 0] * 0.7;
 			int green = Floor[pixel + 1] * 0.7;
 			int blue = Floor[pixel + 2] * 0.7;
@@ -696,79 +710,14 @@ void gm_castRays3D() {
 			glEnd();
 
 		}
-
 		rayA = fixAngle(rayA - 0.5); // kolejny promieñ
 	}
 }
-
-
-// ---- Ekran ----
-
-void gm_init() {
-
-	glClearColor(0.3, 0.3, 0.3, 0);
-
-	player.x = 300; player.y = 300; player.angle = 0;
-	player.dx = cos(degToRad(player.angle));
-	player.dy = -sin(degToRad(player.angle));
-
-
-	Sprite s(SPRITE_STATIC);
-	s.x = 2 * 64;
-	s.y = 5 * 64;
-	sprites->push_back(
-		s
-	);
-	Sprite c(COIN);
-	c.x = 2 * 64;
-	c.y = 2 * 64;
-	
-	Sprite lev(LEVER);
-	lev.x = 1.5 * 64; lev.y = 1.5 * 64;
-	sprites->push_back(c);
-	sprites->push_back(lev);
-
-
-	gameInfo.state = GM_BEGIN;
-
-}
-
-void gm_displayResize(int width, int height) {
-
-	glutReshapeWindow(WIDTH, HEIGHT);
-}
-
-
-void gm_screen(ScreenType screenType) {
-
-	int* S;
-	switch (screenType) {
-
-		case SCR_TITLE:	S = Splashart_test; break;
-		default:		S = Splashart_test; break;
-	}
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
-
-			int pixel	= (y * WIDTH + x) * 3;
-			int red = S[pixel + 0];
-			int green = S[pixel + 1];
-			int blue = S[pixel + 2];
-			glPointSize(1);
-			glColor3ub(red, green, blue);
-			glBegin(GL_POINTS);
-			glVertex2i(x, y);
-			glEnd();
-		}
-	}
-}
-
 void gm_drawHud() {
 
-	int crossbowWidth = 254;
-	int crossbowHeight = 118;
-	int pointSize = 2;
-
+	int crossbowWidth = 128;
+	int crossbowHeight = 64;
+	int pointSize = 5;
 
 	for (int y = 0; y < crossbowHeight; y++) {
 		for (int x = 0; x < crossbowWidth; x++) {
@@ -782,13 +731,12 @@ void gm_drawHud() {
 				glPointSize(pointSize);
 				glColor3ub(red, green, blue);
 				glBegin(GL_POINTS);
-				glVertex2i(WIDTH - crossbowWidth * pointSize + x * pointSize, HEIGHT - crossbowHeight * pointSize + y * pointSize);
+				glVertex2i(WIDTH - crossbowWidth * pointSize + x * pointSize, HEIGHT - crossbowHeight * pointSize + y * pointSize + pointSize);
 				glEnd();
 			}
 		}
 	}
 }
-
 void gm_drawSkybox() {
 
 	// aktualny obrazek ma wymiary
@@ -796,10 +744,10 @@ void gm_drawSkybox() {
 	int skyboxWidth = 120;
 	int skyboxHeight = 80;
 	int* texture = Skybox_01;
-	for (int y = 0; y < skyboxHeight/1.5; y++) {
+	for (int y = 0; y < skyboxHeight / 1.5; y++) {
 		for (int x = 0; x < skyboxWidth; x++) {
 
-			int xOffset = (int)player.angle*2 - x;
+			int xOffset = (int)player.angle * 2 - x;
 			if (xOffset < 0) xOffset += skyboxWidth;
 			xOffset %= skyboxWidth;
 
@@ -817,7 +765,195 @@ void gm_drawSkybox() {
 		}
 	}
 }
+void gm_drawScreen(ScreenType screenType) {
 
+	int* S;
+	int pointSize;
+	int width, height;
+	switch (screenType) {
+
+	case SCR_TITLE:
+		S = Splashart_menu_title;
+		pointSize = 4;
+		width = 256;
+		height = 192;
+		break;
+	case SCR_MENU:
+		S = Splashart_menu_levels;
+		pointSize = 4;
+		width = 256;
+		height = 192;
+		break;
+	case SCR_LV_PASS:
+		S = Splashart_win;
+		pointSize = 4;
+		width = 256;
+		height = 192;
+		break;
+	case SCR_LV_FAIL:
+		S = Splashart_lose;
+		pointSize = 4;
+		width = 256;
+		height = 192;
+		break;
+	default:
+		S = Splashart_test;
+		pointSize = 1;
+		width = 1024;
+		height = 768;
+		break;
+	}
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+
+			int pixel = (y * width + x) * 3;
+			int red = S[pixel + 0];
+			int green = S[pixel + 1];
+			int blue = S[pixel + 2];
+			glPointSize(pointSize);
+			glColor3ub(red, green, blue);
+			glBegin(GL_POINTS);
+			glVertex2i(x * pointSize, y * pointSize);
+			glEnd();
+		}
+	}
+}
+
+
+
+// ---- Funkcje gry ----
+
+void gm_handleClickSetState(GameState state) {
+	gameInfo.state = state;
+}
+void gm_placeSprite(SpriteType type, int gridX, int gridY, int offset = 0) {
+
+	Sprite s(type);
+	s.x = gridX * mapS + mapS / 2;
+	s.y = gridY * mapS + mapS / 2;
+	sprites->push_back(s);
+}
+void gm_placeExit() {
+
+	int x = -1, y = -1;
+	if (settings.exitX != -1 && settings.exitY != 1) {
+		x = settings.exitX;
+		y = settings.exitY;
+	}
+	else {
+		int pos = -1;
+		while (pos != 0 && pos != (settings.posY * settings.width + settings.posX)) {
+			x = rand() % settings.width;
+			if (x == 0 || x == settings.width - 1) continue;
+			y = rand() % settings.width;
+			if (y == 0 || y == settings.height - 1) continue;
+			pos = settings.walls[y * settings.width + x];
+		}
+	}
+	gm_placeSprite(EXIT, x, y);
+	settings.floor[y * settings.width + x] = 6;
+}
+void gm_placePlayer(int posX, int posY) {
+	player.x = (posX * mapS + mapS / 2) + 1.0f;//settings.posX;
+	player.y = (posY * mapS + mapS / 2);//settings.posY;
+	player.angle = fixAngle(0);
+	player.dx = cos(degToRad(player.angle));
+	player.dy = -sin(degToRad(player.angle));
+}
+void gm_randomPlaceEntity(SpriteType type, int offset = 0) {
+
+	int pos = -1, x = -1, y = -1;
+	while (pos != 0 && pos != (settings.posY * settings.width + settings.posX)) {
+		x = rand() % settings.width;
+		if (x == 0 || x == settings.width - 1) continue;
+		y = rand() % settings.width;
+		if (y == 0 || y == settings.height - 1) continue;
+		pos = settings.walls[y * settings.width + x];
+	}
+	
+	gm_placeSprite(type, x, y);
+}
+
+
+
+// ---- Funkcje ustawieñ ----
+
+void gm_init() {
+
+	glClearColor(0.3, 0.3, 0.3, 0);
+	sprites = new std::vector<Sprite>;
+	gameInfo.state = GM_SETUP;
+}
+void gm_setupLabirynth(int lvNum) {
+
+	settings = fetchLabirynth(lvNum);
+
+	gm_placeExit();
+	gm_placePlayer(settings.posX, settings.posY);
+
+	int enemies = 0;
+	int barrels = 2;
+	int crates = 2;
+	int coins = 5;
+	int levers = 1;
+	int rocks = 3;
+	int stones = 3;
+
+	if (lvNum == 1) {	// labirynt
+
+		// utwórz 2 przeciwników
+		enemies = 2;
+		barrels = 3;
+		crates = 1;
+		coins = 3;
+		levers = 1;
+		rocks = 2;
+		stones = 4;
+	}
+	else if (lvNum == 2) {
+
+		gm_placeSprite(CRATE,  3, 1);
+		gm_placeSprite(BARREL, 2, 1);
+		gm_placeSprite(BARREL, 3, 3);
+		gm_placeSprite(CHAIR,  1, 2);
+
+		gm_placeSprite(ENEMY, 6, 6);
+
+	}
+	else if (lvNum == 3) {	// testowa plansza
+
+		gm_placeSprite(ENEMY, 5, 5);
+	}
+	
+	for (int i = 0; i < enemies; i++) {
+		gm_randomPlaceEntity(ENEMY);
+	}
+	for (int i = 0; i < barrels; i++) {
+		gm_randomPlaceEntity(BARREL);
+	}
+	for (int i = 0; i < crates; i++) {
+		gm_randomPlaceEntity(CRATE);
+	}
+	for (int i = 0; i < coins; i++) {
+		gm_randomPlaceEntity(COIN);
+	}
+	for (int i = 0; i < levers; i++) {
+		gm_randomPlaceEntity(LEVER);
+	}
+	for (int i = 0; i < rocks; i++) {
+		gm_randomPlaceEntity(ROCK);
+	}
+	for (int i = 0; i < stones; i++) {
+		gm_randomPlaceEntity(STONE);
+	}
+
+	gm_handleClickSetState(GM_GAME);
+}
+void gm_displayResize(int width, int height) {
+
+	glutReshapeWindow(WIDTH, HEIGHT);
+}
 void gm_displayFunc() {
 
 	// tutaj s¹ konfiguracje odnoœnie
@@ -829,29 +965,51 @@ void gm_displayFunc() {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (gameInfo.state == GM_BEGIN) {	// inicjalizacja
+	if (gameInfo.state == GM_SETUP) {	// inicjalizacja
 
-		gm_init();
 		gameInfo.timer = 0;
-		gameInfo.state = GM_TITLE;
+		gameInfo.state = GM_MENU_TITLE;
+		sprites = new std::vector<Sprite>[1];
+		gameInfo.score = 0;
 		PlaySound(L"audio/DUN_DUN_DUN.wav", NULL, SND_ASYNC | SND_FILENAME);
 
 	}
-	if (gameInfo.state == GM_TITLE) {	// okno g³ówne
+	if (gameInfo.state == GM_MENU_TITLE) {	// okno g³ówne
 
-		gm_screen(SCR_TITLE);
-		gameInfo.timer += 1 * fps;
-		if (gameInfo.timer > 2500) {
-			gameInfo.timer = 0;
-			gameInfo.state = GM_GAME;
-			gameInfo.canClick = true;
+		gm_drawScreen(gameInfo.activeScreen);
 
-		}
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glRasterPos2i(WIDTH / 8, HEIGHT / 3);
 	}
+	if (gameInfo.state == GM_MENU_LEVELS) {
+
+		gm_drawScreen(gameInfo.activeScreen);
+	}
+
+	if (gameInfo.state == GM_MAP) {
+		gameInfo.canClick = false;
+		gm_drawMapIn2D();
+		gm_drawPlayer();
+	}
+
+	if (gameInfo.state == GM_WIN) {
+
+		gm_drawScreen(gameInfo.activeScreen);
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glRasterPos2f(100, 200);
+		glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (unsigned char*)("Liczba zdobytych punktow: " + gameInfo.score));
+
+	}
+	if (gameInfo.state == GM_LOST) {
+		gm_drawScreen(gameInfo.activeScreen);
+	}
+
 	if (gameInfo.state == GM_GAME) {	// pêtla gry
 
+		gameInfo.canClick = true;
+
 		if (keys.a == 1) {
-			player.angle += 0.2 * fps;
+			player.angle += 0.2 * fps;;
 			player.angle = fixAngle(player.angle);
 			player.dx = cos(degToRad(player.angle));
 			player.dy = -sin(degToRad(player.angle));
@@ -878,21 +1036,20 @@ void gm_displayFunc() {
 		int ipy_sub_off = (player.y - yoff) / 64.0;
 
 		if (keys.s == 1) {
-			//px -= pdx* 0.2 * fps;
-			//py -= pdy * 0.2 * fps;
-			if (map_walls[ipy * mapX + ipx_sub_off] == 0) {
+
+			if (settings.walls[ipy * settings.width + ipx_sub_off] == 0) {
 				player.x -= player.dx * 0.2 * fps;
 			}
-			if (map_walls[ipy_sub_off * mapX + ipx] == 0) {
+			if (settings.walls[ipy_sub_off * settings.width + ipx] == 0) {
 				player.y -= player.dy * 0.2 * fps;
 			}
 		}
 		if (keys.w == 1) {
 
-			if (map_walls[ipy * mapX + ipx_add_off] == 0) {
+			if (settings.walls[ipy * settings.width + ipx_add_off] == 0) {
 				player.x += player.dx * 0.2 * fps;
 			}
-			if (map_walls[ipy_add_off * mapX + ipx] == 0) {
+			if (settings.walls[ipy_add_off * settings.width + ipx] == 0) {
 				player.y += player.dy * 0.2 * fps;
 			}
 
@@ -900,25 +1057,105 @@ void gm_displayFunc() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// wyœwietlanie 2D
-		//gm_drawMapIn2D();
-		//gm_drawPlayer();
-
 		gm_drawSkybox();
 		gm_castRays3D();
 		gm_drawSprite();
 		gm_drawHud();
 
 	}
-
-	
-	
-	//gm_screen(SCR_TITLE);
 	glutPostRedisplay();
 	glutSwapBuffers();
 }
+void gm_handleEndGame(bool gitGud) {
+
+	gameInfo.canClick = true;
+	gameInfo.isExitUnlocked = false;
+	if (gitGud) {
+		gameInfo.activeScreen = SCR_LV_FAIL;
+		gameInfo.state = GM_LOST;
+	}
+	else {
+		gameInfo.activeScreen = SCR_LV_PASS;
+		gameInfo.state = GM_WIN;
+		PlaySound(L"audio/DUN_DUN_DUN.wav", NULL, SND_ASYNC | SND_FILENAME);
+	}
+}
+
+
+
+// ---- Funkcje przycisków ----
+
+void gm_handleButtonDown(unsigned char key, int x, int y) {
+
+	const int spacebar = 32;
+	if (key == spacebar && gameInfo.state == GM_MENU_TITLE) {
+		gameInfo.state = GM_MENU_LEVELS;
+		gameInfo.activeScreen = SCR_MENU;
+	}
+
+
+	if (key == 'a')		keys.a = 1;
+	if (key == 'd')		keys.d = 1;
+	if (key == 'w')		keys.w = 1;
+	if (key == 's')		keys.s = 1;
+	if (key == 'm' && gameInfo.state == GM_GAME) 	gameInfo.state = GM_MAP;
+	if ((gameInfo.state == GM_LOST || gameInfo.state == GM_WIN) && key == spacebar) {
+		gameInfo.activeScreen = SCR_TITLE;
+		gameInfo.state = GM_SETUP;
+	}
+	glutPostRedisplay();
+}
+void gm_handleButtonUp(unsigned char key, int x, int y) {
+
+	if (key == 'a')		keys.a = 0;
+	if (key == 'd')		keys.d = 0;
+	if (key == 'w')		keys.w = 0;
+	if (key == 's')		keys.s = 0;
+	if (key == 'm' && gameInfo.state == GM_MAP)	gameInfo.state = GM_GAME;
+
+	glutPostRedisplay();
+}
+void gm_handleClick(int button, int state, int x, int y) {
+
+	if (gameInfo.state == GM_MENU_LEVELS) {
+
+		if (x >= 60 && x <= 297 &&
+			y >= 334 && y <= 358) {
+
+			gm_setupLabirynth(1);	// labirynt
+		}
+
+		if (x >= 58 && x <= 184 &&
+			y >= 394 && y <= 417) {
+
+			gm_setupLabirynth(2);	
+		}
+
+		if (x >= 59  && x <= 512 &&
+			y >= 453 && y <= 477) {
+
+			gm_setupLabirynth(3);
+		}
+	}
+
+	if (gameInfo.canClick == true && state == GLUT_DOWN && button == GLUT_LEFT_BUTTON && state != GLUT_UP) {
+		PlaySound(L"audio/shoot.wav", NULL, SND_ASYNC | SND_FILENAME);
+		Sprite bullet(BULLET);
+		bullet.velocity = 0.5;
+		bullet.angle = player.angle;
+		bullet.liveTime = 0.5 * 1000; // 0.5 sekundy
+		bullet.x = player.x;
+		bullet.y = player.y;
+		bullet.spawnedAt = glutGet(GLUT_ELAPSED_TIME);
+		sprites->push_back(bullet);
+	}
+}
+
+
 
 int main(int argc, char* argv[]) {
+
+	srand(time(NULL));
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);

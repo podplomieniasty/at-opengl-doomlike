@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\dependencies\freeglut\include\;$(SolutionDir)\dependencies\glad\include\;$(SolutionDir)\dependencies\GLFW\include\;</IncludePath>
+    <IncludePath>$(SolutionDir)\dependencies\json\;$(SolutionDir)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\dependencies\freeglut\include\;$(SolutionDir)\dependencies\glad\include\;$(SolutionDir)\dependencies\GLFW\include\;</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)\dependencies\freeglut\lib\$(Platform);$(SolutionDir)\dependencies\GLFW\lib\;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\dependencies\freeglut\include\;$(SolutionDir)\dependencies\glad\include\;$(SolutionDir)\dependencies\GLFW\include\;</IncludePath>
+    <IncludePath>$(SolutionDir)\dependencies\json\;$(SolutionDir)\include\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\dependencies\freeglut\include\;$(SolutionDir)\dependencies\glad\include\;$(SolutionDir)\dependencies\GLFW\include\;</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)\dependencies\freeglut\lib\$(Platform);$(SolutionDir)\dependencies\GLFW\lib\;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dependencies\glad\src\glad.c" />
+    <ClCompile Include="labirynthparser.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,13 +156,21 @@
     <ClInclude Include="dependencies\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="dependencies\GLFW\include\GLFW\glfw3.h" />
     <ClInclude Include="dependencies\GLFW\include\GLFW\glfw3native.h" />
+    <ClInclude Include="dependencies\json\json\json.h" />
+    <ClInclude Include="labirynthparser.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="dependencies\freeglut\bin\Win32\freeglut.dll" />
     <None Include="dependencies\freeglut\bin\x64\freeglut.dll" />
+    <None Include="levels\levels.json" />
     <None Include="README.md" />
+    <None Include="splasharts\Cover.ppm" />
+    <None Include="splasharts\Splashart_lose.ppm" />
+    <None Include="splasharts\Splashart_menu_levels.ppm" />
+    <None Include="splasharts\Splashart_menu_title.ppm" />
     <None Include="splasharts\Splashart_test.ppm" />
+    <None Include="splasharts\Splashart_win.ppm" />
     <None Include="textures\All_Textures.ppm" />
     <None Include="textures\Amogus_01.ppm" />
     <None Include="textures\Bricks_01.ppm" />
@@ -187,6 +196,7 @@
     <Media Include="audio\lever.wav" />
     <Media Include="audio\loss.wav" />
     <Media Include="audio\shoot.wav" />
+    <Media Include="audio\wood_break.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

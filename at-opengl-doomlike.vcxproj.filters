@@ -21,6 +21,9 @@
     <ClCompile Include="dependencies\glad\src\glad.c">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="labirynthparser.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dependencies\GLFW\include\GLFW\glfw3.h">
@@ -47,6 +50,12 @@
     <ClInclude Include="dependencies\freeglut\include\GL\glut.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="dependencies\json\json\json.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="labirynthparser.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dependencies\freeglut\bin\x64\freeglut.dll" />
@@ -66,6 +75,12 @@
     <None Include="textures\Sprites.ppm" />
     <None Include="textures\Crossbow.ppm" />
     <None Include="textures\Chaser.ppm" />
+    <None Include="levels\levels.json" />
+    <None Include="splasharts\Cover.ppm" />
+    <None Include="splasharts\Splashart_menu_levels.ppm" />
+    <None Include="splasharts\Splashart_menu_title.ppm" />
+    <None Include="splasharts\Splashart_lose.ppm" />
+    <None Include="splasharts\Splashart_win.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\GLFW\lib\glfw3.lib" />
@@ -87,6 +102,9 @@
       <Filter>Pliki zasobów</Filter>
     </Media>
     <Media Include="audio\loss.wav">
+      <Filter>Pliki zasobów</Filter>
+    </Media>
+    <Media Include="audio\wood_break.wav">
       <Filter>Pliki zasobów</Filter>
     </Media>
   </ItemGroup>
